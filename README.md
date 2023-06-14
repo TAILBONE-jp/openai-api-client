@@ -19,13 +19,13 @@ Do not leak your keys in public!
 
 ## Installation
 ```bash
-npm install openai-client
+npm install openai-api-client
 ```
 
 ## Setup for frontend
 
 ```typescript
-import {OpenAIApi, VoidThrottleManagerServiceImpl} from "openai-client";
+import {OpenAIApi, VoidThrottleManagerServiceImpl} from "openai-api-client";
 
 const openAI = OpenAIApi({
   baseUrl: "/api/openai", // URL of a proxy implemented at backend
@@ -36,7 +36,7 @@ const openAI = OpenAIApi({
 ## Setup for backend
 
 ```typescript
-import {OpenAIApi, DefaultThrottleManagerServiceImpl} from "openai-client";
+import {OpenAIApi, DefaultThrottleManagerServiceImpl} from "openai-api-client";
 
 const openAI = OpenAIApi({
   apiKey: CHATGPT_API_KEY,
@@ -56,7 +56,7 @@ const files = await openAI.listFiles()
 import {
   CreateChatCompletionStreamResponse,
   RequestInitWithCallbacks,
-} from "openai-client";
+} from "openai-api-client";
 
 // should be void.
 void openAI.createChatCompletion({
@@ -81,7 +81,7 @@ void openAI.createChatCompletion({
 ## Implement your own throttle manager
 
 ```typescript
-import {AbstractThrottleManagerService, ResetParams} from "openai-client";
+import {AbstractThrottleManagerService, ResetParams} from "openai-api-client";
 
 class MyThrottleManagerServiceImpl extends AbstractThrottleManagerService {
   constructor(id: string) {
