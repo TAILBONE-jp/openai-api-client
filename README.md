@@ -27,7 +27,7 @@ npm install openai-client
 ```typescript
 import {OpenAIApi, VoidThrottleManagerServiceImpl} from "openai-client";
 
-export const openAI = OpenAIApi({
+const openAI = OpenAIApi({
   baseUrl: "/api/openai", // URL of a proxy implemented at backend
   throttleManagerService: new VoidThrottleManagerServiceImpl() // Do not care about rate limit
 })
@@ -38,7 +38,7 @@ export const openAI = OpenAIApi({
 ```typescript
 import {OpenAIApi, DefaultThrottleManagerServiceImpl} from "openai-client";
 
-export const openAI = OpenAIApi({
+const openAI = OpenAIApi({
   apiKey: CHATGPT_API_KEY,
   organization: CHATGPT_ORGANIZATION_ID,
   throttleManagerService: new DefaultThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID)
@@ -48,8 +48,6 @@ export const openAI = OpenAIApi({
 ## Examples
 ### List files
 ```typescript
-import {openAI} from "openAiClient.ts"; // see the setup codes above
-
 const files = await openAI.listFiles()
 ```
 
@@ -57,10 +55,8 @@ const files = await openAI.listFiles()
 ```typescript
 import {
   CreateChatCompletionStreamResponse,
-  Params$createChatCompletion,
   RequestInitWithCallbacks,
 } from "openai-client";
-import {openAI} from "openAiClient.ts"; // see the setup codes above
 
 // should be void.
 void openAI.createChatCompletion({
@@ -72,8 +68,11 @@ void openAI.createChatCompletion({
   // Callback function when streaming begins.
   onOpen: () => { ... },
   // Callback function when receiving delta.
-  // you need to type cast the 'json' variable with CreateChatCompletionStreamResponse
-  onMessage: (json: any) => { ... },
+  onMessage: (json: CreateChatCompletionStreamResponse) => {
+    // or cast 'json' variable with CreateCompletionStreamResponse type
+    // if you call openAI.createCompletion
+    ...
+  },
   // Callback function when streaming ends.
   onClose: () => { ... }
 })
@@ -84,7 +83,7 @@ void openAI.createChatCompletion({
 ```typescript
 import {AbstractThrottleManagerService, ResetParams} from "openai-client";
 
-class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService {
+class MyThrottleManagerServiceImpl extends AbstractThrottleManagerService {
   constructor(id: string) {
     super(id)
     // write your codes
@@ -98,4 +97,18 @@ class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService {
     // write your codes
   }
 }
+
+const openAI = OpenAIApi({
+  ... // write parameters
+  throttleManagerService: new MyThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID)
+})
 ```
+
+## Support
+Please check [Issue tracker](https://github.com/TAILBONE-jp/openai-api-client/issues)
+
+## License
+[MIT License](https://github.com/TAILBONE-jp/openai-api-client/blob/HEAD/LICENSE)
+
+## Disclaimer
+This is unofficial client library and not endorsed by OpenAI.
