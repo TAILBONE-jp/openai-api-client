@@ -1,5 +1,5 @@
 {
-  "name": "openai-client",
+  "name": "@mkoma/openai-client",
   "version": "0.0.1",
   "author": "Masanori KOMAGAMINE <koma@tailbone.jp>",
   "type": "module",
