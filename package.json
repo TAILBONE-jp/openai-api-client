@@ -30,5 +30,10 @@
   },
   "bugs": {
     "url": "https://github.com/TAILBONE-jp/openapi-client/issues"
-  }
+  },
+  "keywords": [
+    "openai",
+    "typescript",
+    "esm"
+  ]
 }
