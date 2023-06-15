@@ -8,6 +8,7 @@
     "update": "NODE_OPTIONS='--dns-result-order=ipv4first' pnpm update"
   },
   "license": "MIT",
+  "exports": "./dist/index.js",
   "dependencies": {
     "@himenon/openapi-parameter-formatter": "^0.3.1",
     "async-lock": "^1.4.0"
