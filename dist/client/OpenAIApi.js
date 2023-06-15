@@ -42,11 +42,13 @@ export const OpenAIApi = ({ apiKey, baseUrl, additionalHeaders, onResponse, orga
             }
             let response;
             const contentType = headers["Content-Type"];
+            const headersOverride = { ...headers, ...options?.headers };
+            delete options?.headers;
             switch (contentType) {
                 case "application/json":
                     response = await fetch(requestUrl, {
                         body: JSON.stringify(requestBody),
-                        headers,
+                        headers: headersOverride,
                         method: httpMethod,
                         ...options,
                     });
@@ -65,14 +67,17 @@ export const OpenAIApi = ({ apiKey, baseUrl, additionalHeaders, onResponse, orga
                     });
                     response = await fetch(requestUrl, {
                         body: formData,
-                        headers,
+                        headers: headersOverride,
                         method: httpMethod,
                         ...options,
                     });
                     break;
                 default:
+                    if (/\/files\/.+\/content$/.test(url)) {
+                        headersOverride.Accept = "*/*"; // Bug of OpenAI's schema
+                    }
                     response = await fetch(requestUrl, {
-                        headers,
+                        headers: headersOverride,
                         method: httpMethod,
                         ...options,
                     });
@@ -134,7 +139,7 @@ export const OpenAIApi = ({ apiKey, baseUrl, additionalHeaders, onResponse, orga
                 }
             }
             else {
-                throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url} Headers: ${JSON.stringify(headers)}`);
+                throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url} Headers: ${JSON.stringify(headersOverride)}`);
             }
         }
     };

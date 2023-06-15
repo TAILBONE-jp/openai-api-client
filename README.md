@@ -165,7 +165,14 @@ const fileToBlobWithFilename = (filePath: string): BlobWithFilename => {
 training-dummy-data.jsonl (fine-tune) Created:2023-06-15T12:42:27.000Z status:uploaded
 ```
 
-
+### downloadFile
+```typescript
+const content: string = await openAI.downloadFile({
+  parameter: {
+    file_id: id
+  }
+})
+```
 
 ### Function Calling
 see: https://platform.openai.com/docs/guides/gpt/function-calling
