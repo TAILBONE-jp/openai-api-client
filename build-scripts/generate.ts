@@ -17,9 +17,8 @@ const __dirname = path.dirname(__filename);
 
 const remoteSchemaUrl = "https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml"
 const generatedPath = path.join(__dirname, "../generated/");
-const schemaPath = path.join(__dirname, "../schema/");
 
-const openApiSchemaPath = path.join(schemaPath, "openapi.yml")
+const openApiSchemaPath = path.join(generatedPath, "openapi.yml")
 const mdPath = path.join(__dirname, "../README.md")
 
 const main = async () => {
@@ -41,7 +40,6 @@ const main = async () => {
   const updatedMd = md.replace(/Current schema version is:.*$/gm, `Current schema version is: ${version}`)
   writeFileSync(mdPath, updatedMd)
 
-  ensureDirSync(schemaPath);
   ensureDirSync(generatedPath);
   writeFileSync(openApiSchemaPath, schemaData)
 
