@@ -1,5 +1,4 @@
-import {AbstractThrottleManagerService, ResetParams} from "./AbstractThrottleManagerService.js";
-
+import { AbstractThrottleManagerService, ResetParams } from "./AbstractThrottleManagerService.js";
 export declare class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService {
     debug: boolean;
     constructor(id: string, debug?: boolean);

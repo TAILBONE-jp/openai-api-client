@@ -1,6 +1,5 @@
-import {Client} from "../generated/apiClient.js";
+import { Client } from "../generated/apiClient.js";
 import * as Formatter from "@himenon/openapi-parameter-formatter";
-
 export const OpenAIApi = ({ apiKey, baseUrl, additionalHeaders, onResponse, organization, throttleManagerService, }) => {
     const openAiApiFetch = {
         request: async ({ url, headers, queryParameters, requestBody, httpMethod }, options) => {

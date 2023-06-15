@@ -1,6 +1,5 @@
 import AsyncLock from "async-lock";
-import {AbstractThrottleManagerService} from "./AbstractThrottleManagerService.js";
-
+import { AbstractThrottleManagerService } from "./AbstractThrottleManagerService.js";
 const timeLimitMap = new Map();
 const lock = new AsyncLock();
 export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService {

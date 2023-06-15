@@ -1,5 +1,4 @@
-import {Schemas} from "../generated/apiClient.js";
-
+import { Schemas } from "../generated/apiClient.js";
 export interface CreateChatCompletionStreamResponse {
     id: string;
     object: string;

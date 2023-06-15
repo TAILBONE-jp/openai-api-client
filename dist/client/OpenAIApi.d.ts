@@ -1,6 +1,5 @@
-import {Client, ObjectLike} from "../generated/apiClient.js";
-import {AbstractThrottleManagerService} from "./AbstractThrottleManagerService.js";
-
+import { Client, ObjectLike } from "../generated/apiClient.js";
+import { AbstractThrottleManagerService } from "./AbstractThrottleManagerService.js";
 export interface OpenAIApiParams {
     apiKey?: string;
     organization?: string;
