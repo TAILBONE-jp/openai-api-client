@@ -13,7 +13,7 @@ Do not leak your keys in public!
 
 ### Features
 * Can use with both frontend and backend codes.
-* Sync with the OpenAPI schema provided by OpenAI officially.
+* Sync with the [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI officially. Current schema version is: 1.3.0
 * Streaming completions (`stream=true`) are supported.
 * Very basic implementation for throttle management.
 

@@ -1,10 +1,11 @@
-import {writeFileSync} from "fs";
+import {readFileSync, writeFileSync} from "fs";
 import {emptyDirSync, ensureDirSync} from "fs-extra";
 
 import {createRequire} from "module";
 import {execSync} from "child_process";
 import * as path from "path";
 import {fileURLToPath} from "url";
+import YAML from "yaml";
 
 const require = createRequire(import.meta.url);
 
@@ -14,9 +15,12 @@ const Templates = require("@himenon/openapi-typescript-code-generator/templates"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const remoteSchemaUrl = "https://github.com/openai/openai-openapi/raw/master/openapi.yaml"
-const generatedPath = path.join(__dirname, `../generated/`);
-const openApiSchemaPath = path.join(generatedPath, "openapi.yml")
+const remoteSchemaUrl = "https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml"
+const generatedPath = path.join(__dirname, "../generated/");
+const schemaPath = path.join(__dirname, "../schema/");
+
+const openApiSchemaPath = path.join(schemaPath, "openapi.yml")
+const mdPath = path.join(__dirname, "../README.md")
 
 const main = async () => {
   const response = await fetch(remoteSchemaUrl)
@@ -24,8 +28,22 @@ const main = async () => {
     throw new Error(`Cannot download schema from: ${remoteSchemaUrl}`)
   }
 
+  const schemaData = await response.text()
+  const yaml = YAML.parse(schemaData)
+  const version = yaml.info?.version
+
+  console.log(`Schema version: ${version}`)
+  if (!version) {
+    throw new Error(`Cannot parse schema at: ${remoteSchemaUrl}`)
+  }
+
+  const md = readFileSync(mdPath, {encoding: "utf-8"})
+  const updatedMd = md.replace(/Current schema version is:.*$/gm, `Current schema version is: ${version}`)
+  writeFileSync(mdPath, updatedMd)
+
+  ensureDirSync(schemaPath);
   ensureDirSync(generatedPath);
-  writeFileSync(openApiSchemaPath, await response.text())
+  writeFileSync(openApiSchemaPath, schemaData)
 
   const codeGenerator = new CodeGenerator(openApiSchemaPath, {
     convertOption: {
