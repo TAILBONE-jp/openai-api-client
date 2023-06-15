@@ -46,9 +46,65 @@ const openAI = OpenAIApi({
 ```
 
 ## Examples
-### List files
+### listFiles
+
 ```typescript
 const files = await openAI.listFiles()
+
+files.data.forEach(({filename, purpose, created_at, status}) => {
+  console.log(`${filename} (${purpose}) Created:${new Date(created_at*1000).toISOString()} status:${status}`)
+})
+```
+#### Result
+```text
+compiled_results.csv (fine-tune-results) Created:2023-05-19T01:19:55.000Z status:processed
+training-data.jsonl (fine-tune) Created:2023-05-19T01:15:35.000Z status:processed
+```
+
+### listModels
+```typescript
+const models = await openAI.listModels()
+
+models.data
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .forEach(({id, owned_by, object, created}) => {
+    console.log(`${id} (${owned_by}) created:${new Date(created * 1000).toISOString()}`)
+  })
+```
+
+#### Result
+```text
+ada (openai) created:2022-04-07T18:51:31.000Z
+ada-code-search-code (openai-dev) created:2022-04-28T19:01:45.000Z
+ada-code-search-text (openai-dev) created:2022-04-28T19:01:50.000Z
+...
+```
+
+### createChatCompletion
+```typescript
+import {Schemas} from "openai-api-client";
+import ChatCompletionRequestMessage = Schemas.ChatCompletionRequestMessage;
+
+const messages: Array<ChatCompletionRequestMessage> = [
+  {role: "user", content: "Please calculate (1+1)/0"},
+]
+
+const completion = await openAI.createChatCompletion({
+  requestBody: {
+    model: "gpt-3.5-turbo-0613",
+    messages
+  }
+})
+
+console.log(completion.choices[0].message)
+```
+
+#### Result
+```text
+{
+  role: 'assistant',
+  content: 'The expression (1+1)/0 is undefined. Dividing any number by zero is undefined in mathematics.'
+}
 ```
 
 ### Streaming chat completion
@@ -105,7 +161,7 @@ const openAI = OpenAIApi({
 ```
 
 ## Support
-Please check [Issue tracker](https://github.com/TAILBONE-jp/openai-api-client/issues)
+[Issue tracker](https://github.com/TAILBONE-jp/openai-api-client/issues)
 
 ## License
 [MIT License](https://github.com/TAILBONE-jp/openai-api-client/blob/HEAD/LICENSE)
