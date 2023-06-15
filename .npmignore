@@ -1,0 +1,9 @@
+.env
+.idea
+/build-scripts
+/client
+/examples
+/generated
+/node_modules
+openai-api-client.iml
+pnpm-lock.yaml

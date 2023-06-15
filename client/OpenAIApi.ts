@@ -109,10 +109,10 @@ export const OpenAIApi = (
       switch (contentType) {
         case "application/json":
           response = await fetch(requestUrl, {
-            ...options,
             body: JSON.stringify(requestBody),
             headers,
             method: httpMethod,
+            ...options,
           });
           break
         case "multipart/form-data":
@@ -129,17 +129,17 @@ export const OpenAIApi = (
           })
 
           response = await fetch(requestUrl, {
-            ...options,
             body: formData,
             headers,
             method: httpMethod,
+            ...options,
           });
           break
         default:
           response = await fetch(requestUrl, {
-            ...options,
             headers,
             method: httpMethod,
+            ...options,
           });
           break
       }

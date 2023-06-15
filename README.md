@@ -134,6 +134,39 @@ void openAI.createChatCompletion({
 })
 ```
 
+### createFile
+```typescript
+const {filename, purpose, created_at, status} = await openAI.createFile({
+  requestBody: {
+    file: fileToBlobWithFilename(filePath),
+    purpose: "fine-tune"
+  }
+})
+
+console.log(`${filename} (${purpose}) Created:${new Date(created_at * 1000).toISOString()} status:${status}`)
+```
+#### fileToBlobWithFilename (for backend)
+This library does not contain code for making BlobWithFilename object
+as it will cause conflicts between frontend and backend environment.
+```typescript
+import {BlobWithFilename} from "openai-api-client";
+import path from "path";
+import {readFileSync} from "fs";
+
+const fileToBlobWithFilename = (filePath: string): BlobWithFilename => {
+  const filename = path.basename(filePath)
+  const buffer = readFileSync(filePath)
+
+  return new BlobWithFilename([buffer], filename)
+}
+```
+#### Result
+```text
+training-dummy-data.jsonl (fine-tune) Created:2023-06-15T12:42:27.000Z status:uploaded
+```
+
+
+
 ### Function Calling
 see: https://platform.openai.com/docs/guides/gpt/function-calling
 ```typescript
