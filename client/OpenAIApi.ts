@@ -1,4 +1,4 @@
-import {ApiClient, BlobWithFilename, Client, ObjectLike} from "../generated/apiClient.js";
+import {ApiClient, BlobWithFilename, Client} from "../generated/apiClient.js";
 
 import {AbstractThrottleManagerService} from "./AbstractThrottleManagerService.js";
 import * as Formatter from "@himenon/openapi-parameter-formatter";
@@ -8,7 +8,7 @@ export interface OpenAIApiParams {
   apiKey?: string,
   organization?: string,
   baseUrl?: string,
-  additionalHeaders?: ObjectLike
+  commonOptions?: RequestInit,
   onResponse?: (response: Response) => void
   throttleManagerService: AbstractThrottleManagerService,
 }
@@ -22,16 +22,21 @@ export interface RequestInitWithCallbacks extends RequestInit {
   onClose?: () => void
 }
 
+const OpenAIAPIEndpoint = "https://api.openai.com/v1"
+
 export const OpenAIApi = (
   {
     apiKey,
     baseUrl,
-    additionalHeaders,
+    commonOptions,
     onResponse,
     organization,
     throttleManagerService,
   }: OpenAIApiParams
 ) => {
+  const commonHeaders = commonOptions?.headers
+  delete commonOptions?.headers
+
   const openAiApiFetch: ApiClient<RequestInitWithCallbacks> = {
     request: async (
       {
@@ -84,10 +89,6 @@ export const OpenAIApi = (
 
       const query = generateQueryString(queryParameters);
       const requestUrl = query ? url + "?" + encodeURI(query) : url;
-      headers = {
-        ...headers,
-        ...additionalHeaders,
-      };
 
       if (apiKey) {
         headers = {
@@ -105,7 +106,8 @@ export const OpenAIApi = (
 
       let response: Response
       const contentType = headers["Content-Type"]
-      const headersOverride = {...headers, ...options?.headers}
+      const headersOverride = {...headers, ...commonHeaders, ...options?.headers}
+
       delete options?.headers
 
       switch (contentType) {
@@ -114,6 +116,7 @@ export const OpenAIApi = (
             body: JSON.stringify(requestBody),
             headers: headersOverride,
             method: httpMethod,
+            ...commonOptions,
             ...options,
           });
           break
@@ -134,6 +137,7 @@ export const OpenAIApi = (
             body: formData,
             headers: headersOverride,
             method: httpMethod,
+            ...commonOptions,
             ...options,
           });
           break
@@ -144,6 +148,7 @@ export const OpenAIApi = (
           response = await fetch(requestUrl, {
             headers: headersOverride,
             method: httpMethod,
+            ...commonOptions,
             ...options,
           });
           break
@@ -208,12 +213,12 @@ export const OpenAIApi = (
             throw new Error(`Unknown content type: ${responseContentType}`)
         }
       } else {
-        throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url} Headers: ${JSON.stringify(headersOverride)}`)
+        throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url}`)
       }
     }
   };
 
-  return new Client(openAiApiFetch, baseUrl || "https://api.openai.com/v1");
+  return new Client(openAiApiFetch, baseUrl || OpenAIAPIEndpoint);
 };
 
 const ratelimitResetValueToMilliSeconds = (value: string | null): number | null => {

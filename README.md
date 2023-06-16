@@ -1,41 +1,48 @@
-# OpenAI Client Library
+# OpenAI API Client Library
 Yet another OpenAI client for both frontend (ex. React) and backend (Node.js) with TypeScript.
-
-### Requirements
-* Node.js >= 18.0.0 since this library uses the experimental implementation of fetch
-to avoid dependencies with 3rd party libraries as possible.
-
-### Recommendation
-You should setup a proxy at backend code to avoid passing secret API key between frontend and backend.
-
-Do not leak your keys in public!
 
 ### Features
 * Can use with both frontend and backend codes.
 * Dual package (CommonJS & ESModules)
-* Sync with the [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI officially. Current schema version is: 1.3.0
+* Sync with the official [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI. Current schema version is: 1.3.0
 * Streaming completions (`stream=true`) are supported.
-* Basic implementation for throttle management.
+* Basic implementation for throttle management. You can implement your own logic if needed.
+
+### Requirements
+* Node.js >= 18.0.0 since this library uses the Node.js's experimental implementation of `fetch`
+  to avoid dependencies with 3rd party libraries as possible.
+
+### Recommendation
+If you plan to write frontend codes, you should setup a proxy at backend code to avoid passing secret API key between frontend and backend.
+When your frontend codes send queries to the proxy, it's supposed to rewrite the incoming HTTP headers and inject secret API keys, then forward your request to the OpenAI API server.
+You also need to protect the proxy endpoint with CORS and authentication.
 
 ## Installation
 ```bash
 npm install openai-api-client
 ```
 
-## Setup for frontend
+## Setup
+### Frontend
 ```typescript
 import {OpenAIApi, VoidThrottleManagerServiceImpl} from "openai-api-client";
 
+// Accessing to the OpenAI API server via proxy
 const openAI = OpenAIApi({
   baseUrl: "/api/openai", // URL of a proxy implemented at backend
-  throttleManagerService: new VoidThrottleManagerServiceImpl() // Do not care about rate limit
+  throttleManagerService: new VoidThrottleManagerServiceImpl(), // Do not care about rate limit as the proxy handles.
+  commonOptions:{ // RequestInit object passed to fetch
+    headers:{
+      "Authentication": SOME_TOKEN, // To protect the proxy endpoint
+    }
+  }
 })
 ```
-
-## Setup for backend
+### Backend
 ```typescript
 import {OpenAIApi, DefaultThrottleManagerServiceImpl} from "openai-api-client";
 
+// Accessing to the OpenAI API server directly
 const openAI = OpenAIApi({
   apiKey: CHATGPT_API_KEY,
   organization: CHATGPT_ORGANIZATION_ID,
@@ -174,7 +181,7 @@ console.log(`${filename} (${purpose}) Created:${new Date(created_at * 1000).toIS
 
 #### fileToBlobWithFilename (for backend)
 This library does not contain code for making BlobWithFilename object
-as it will cause conflicts between frontend and backend environment.
+as it will cause conflicts between frontend and backend environment (fail to load "path" and "fs" libraries in frontend).
 ```typescript
 import {BlobWithFilename} from "openai-api-client";
 import path from "path";
