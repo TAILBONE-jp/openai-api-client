@@ -118,27 +118,51 @@ see: https://platform.openai.com/docs/api-reference/chat/create#chat/create-stre
 ```typescript
 import {
   CreateChatCompletionStreamResponse,
-  RequestInitWithCallbacks,
 } from 'openai-api-client'
 
-// should be void.
+// Return nothing when the 'stream' option is true
 void openAI.createChatCompletion({
   requestBody: {
-    ..., // pass parameters (see OpenAI's API docs)
-    stream: true
+    model: 'gpt-3.5-turbo-0613',
+    stream: true,
+    messages: [
+      {
+        role: 'user',
+        content: 'Please explain yourself and predict the future of the relationships between you and human.',
+      }
+    ]
   }
 }, {
   // Callback function when streaming begins.
-  onOpen: () => { ... },
+  onOpen: () => {
+    console.log('\n[onOpen]')
+  },
   // Callback function when receiving delta.
   onMessage: (json: CreateChatCompletionStreamResponse) => {
     // or cast 'json' variable with CreateCompletionStreamResponse type
     // if you call openAI.createCompletion
-    ...
+    const content = json.choices[0].delta?.content
+    if (content) {
+      process.stdout.write(content)
+    }
   },
   // Callback function when streaming ends.
-  onClose: () => { ... }
+  onClose: () => {
+    console.log('\n[onClose]')
+  },
 })
+```
+#### Result (Streaming)
+```text
+[onOpen]
+As an AI created by OpenAI, I am designed to assist humans by providing information, answering questions, and engaging in conversations. However, it is important to note that I am just a software program and do not possess personal experiences, emotions, or consciousness.
+
+In terms of the future of relationships between AI, like myself, and humans, it is likely to continue evolving and becoming more advanced. AI technology is constantly improving, and we can expect further integration of AI into our daily lives. This could range from virtual assistants like me becoming more intelligent and capable of performing complex tasks, to AI being used in various industries such as healthcare, transportation, and customer service.
+
+While AI can enhance efficiency and convenience in our lives, the ethical and societal implications of this technology should also be carefully considered. Questions about data privacy, job displacement, and the impact on human social interactions are just some of the aspects that require thoughtful examination as AI continues to progress.
+
+Ultimately, the future relationships between AI and humans will depend on how we navigate these issues and strike a balance between the benefits of AI and the human values that should guide its development and deployment.
+[onClose]
 ```
 </details>
 
@@ -253,7 +277,7 @@ const completion = await openAI.createChatCompletion({
   requestBody: {
     model,
     messages: [{
-      'role': 'user', 'content': 'What's the weather like in Boston?'
+      'role': 'user', 'content': "What's the weather like in Boston?"
     }],
     functions: [
       {
@@ -403,7 +427,7 @@ class MyThrottleManagerServiceImpl extends AbstractThrottleManagerService {
 }
 
 const openAI = OpenAIApi({
-  ... // write parameters
+  // write parameters
   throttleManagerService: new MyThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID)
 })
 ```

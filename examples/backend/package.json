@@ -5,6 +5,7 @@
     "listFiles": "dotenv -- ts-node src/listFiles.ts",
     "listModels": "dotenv -- ts-node src/listModels.ts",
     "chatCompletion": "dotenv -- ts-node src/chatCompletion.ts",
+    "streamChatCompletion": "dotenv -- ts-node src/streamChatCompletion.ts",
     "functionCalling": "dotenv -- ts-node src/functionCalling.ts",
     "createFile": "dotenv -- ts-node src/createFile.ts",
     "downloadFiles": "dotenv -- ts-node src/downloadFiles.ts",
