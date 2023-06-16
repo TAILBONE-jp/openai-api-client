@@ -23,7 +23,6 @@ npm install openai-api-client
 ```
 
 ## Setup for frontend
-
 ```typescript
 import {OpenAIApi, VoidThrottleManagerServiceImpl} from "openai-api-client";
 
@@ -34,7 +33,6 @@ const openAI = OpenAIApi({
 ```
 
 ## Setup for backend
-
 ```typescript
 import {OpenAIApi, DefaultThrottleManagerServiceImpl} from "openai-api-client";
 
@@ -145,6 +143,7 @@ const {filename, purpose, created_at, status} = await openAI.createFile({
 
 console.log(`${filename} (${purpose}) Created:${new Date(created_at * 1000).toISOString()} status:${status}`)
 ```
+
 #### fileToBlobWithFilename (for backend)
 This library does not contain code for making BlobWithFilename object
 as it will cause conflicts between frontend and backend environment.
@@ -160,6 +159,7 @@ const fileToBlobWithFilename = (filePath: string): BlobWithFilename => {
   return new BlobWithFilename([buffer], filename)
 }
 ```
+
 #### Result
 ```text
 training-dummy-data.jsonl (fine-tune) Created:2023-06-15T12:42:27.000Z status:uploaded
@@ -257,6 +257,7 @@ if (message?.function_call) {
   console.log(secondResponse.choices[0].message)
 }
 ```
+
 #### get_current_weather.json
 ```json
 {
@@ -279,6 +280,7 @@ if (message?.function_call) {
   ]
 }
 ```
+
 #### get_current_weather.d.ts
 ```typescript
 /* eslint-disable */
@@ -306,6 +308,27 @@ export interface GetCurrentWeather {
 }
 ```
 
+## Set timeout
+```typescript
+const abortController = new AbortController()
+const timeoutId = setTimeout(() => abortController.abort(), 1000 * 1) // too short timeout for testing
+
+const completion = await openAI.createChatCompletion({
+  requestBody: {
+    model: "gpt-3.5-turbo-0613",
+    messages: [{role: "user", content: "Please calculate (1+1)/0"}]
+  }
+}, {
+  signal: abortController.signal  // 2nd parameter accepts RequestInit object passed to fetch
+})
+
+clearTimeout(timeoutId)
+console.log(completion.choices[0].message)
+```
+#### Result
+```text
+DOMException [AbortError]: This operation was aborted
+```
 
 ## Implement your own throttle manager
 
