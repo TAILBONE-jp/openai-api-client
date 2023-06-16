@@ -105,15 +105,15 @@ export declare namespace Schemas {
         created: number;
         model: string;
         choices: {
-            text?: string;
-            index?: number;
-            logprobs?: {
+            text: string;
+            index: number;
+            logprobs: {
                 tokens?: string[];
                 token_logprobs?: number[];
                 top_logprobs?: {}[];
                 text_offset?: number[];
             } | null;
-            finish_reason?: string;
+            finish_reason: string;
         }[];
         usage?: {
             prompt_tokens: number;

@@ -2,23 +2,7 @@
   "name": "openai-api-client",
   "version": "0.1.0",
   "author": "Masanori KOMAGAMINE <koma@tailbone.jp>",
-  "type": "module",
-  "main": "./dist/cjs/index.js",
-  "types": "./dist/esm/index.d.ts",
-  "module": "./dist/esm/index.js",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.ts",
-        "default": "./dist/cjs/index.js"
-      },
-      "default": "./dist/cjs/index.js"
-    }
-  },
+  "type": "commonjs",
   "scripts": {
     "build": "ts-node build-scripts/build.ts",
     "update": "NODE_OPTIONS='--dns-result-order=ipv4first' pnpm update"

@@ -1,0 +1,13 @@
+{
+  "type": "commonjs",
+  "scripts": {
+    "listModelsCjs": "dotenv -- node src/listModels.js"
+  },
+  "dependencies": {
+    "openai-api-client": "file:../../"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "dotenv-cli": "^7.2.1"
+  }
+}

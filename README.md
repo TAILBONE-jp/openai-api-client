@@ -4,7 +4,6 @@ Yet another OpenAI client for both frontend (ex. React) and backend (Node.js) wi
 ### Requirements
 * Node.js >= 18.0.0 since this library uses the experimental implementation of fetch
 to avoid dependencies with 3rd party libraries as possible.
-* Sorry ESM only and no plan for backward compatibility to CommonJS.
 
 ### Recommendation
 You should setup a proxy at backend code to avoid passing secret API key between frontend and backend.
@@ -13,9 +12,10 @@ Do not leak your keys in public!
 
 ### Features
 * Can use with both frontend and backend codes.
+* Dual package (CommonJS & ESModules)
 * Sync with the [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI officially. Current schema version is: 1.3.0
 * Streaming completions (`stream=true`) are supported.
-* Very basic implementation for throttle management.
+* Basic implementation for throttle management.
 
 ## Installation
 ```bash

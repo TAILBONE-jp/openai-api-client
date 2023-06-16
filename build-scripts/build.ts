@@ -81,7 +81,9 @@ const main = async () => {
   });
 
   emptyDirSync("./dist");
-  execSync("pnpm exec tsc --project tsconfig.build.json");
+  execSync("pnpm exec tsc --project tsconfig.build.esm.json", {encoding: "utf-8"});
+  execSync("pnpm exec tsc --project tsconfig.build.cjs.json", {encoding: "utf-8"});
+  execSync("pnpm exec tsconfig-to-dual-package", {encoding: "utf-8"})
 }
 
 main();
