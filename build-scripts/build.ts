@@ -21,6 +21,8 @@ const generatedPath = path.join(__dirname, '../generated/')
 const openApiSchemaPath = path.join(generatedPath, 'openapi.yml')
 const mdPath = path.join(__dirname, '../README.md')
 
+const distPath = path.join(__dirname, '../dist/')
+
 const main = async (): Promise<void> => {
   const response = await fetch(remoteSchemaUrl)
   if (!response.ok) {
@@ -80,7 +82,7 @@ const main = async (): Promise<void> => {
     encoding: 'utf-8'
   })
 
-  emptyDirSync('./dist')
+  emptyDirSync(distPath)
   execSync('pnpm exec tsc --project tsconfig.build.esm.json', { encoding: 'utf-8' })
   execSync('pnpm exec tsc --project tsconfig.build.cjs.json', { encoding: 'utf-8' })
   execSync('pnpm exec tsconfig-to-dual-package', { encoding: 'utf-8' })

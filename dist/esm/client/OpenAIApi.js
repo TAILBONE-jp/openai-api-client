@@ -108,7 +108,7 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
                             const textDecoder = new TextDecoder();
                             let sentOnOpen = false;
                             let shouldContinue = true;
-                            while (shouldContinue) {
+                            while (shouldContinue && ((options?.signal?.aborted) === undefined || (options?.signal?.aborted) === false)) {
                                 const { done, value } = await reader.read();
                                 const decodedArray = textDecoder.decode(value).split('\n');
                                 decodedArray.forEach(decoded => {
