@@ -309,22 +309,22 @@ if (message?.function_call) {
 #### get_current_weather.json
 ```json
 {
-  'type': 'object',
-  'properties': {
-    'location': {
-      'type': 'string',
-      'description': 'The city and state, e.g. San Francisco, CA'
+  "type": "object",
+  "properties": {
+    "location": {
+      "type": "string",
+      "description": "The city and state, e.g. San Francisco, CA"
     },
-    'unit': {
-      'type': 'string',
-      'enum': [
-        'celsius',
-        'fahrenheit'
+    "unit": {
+      "type": "string",
+      "enum": [
+        "celsius",
+        "fahrenheit"
       ]
     }
   },
-  'required': [
-    'location'
+  "required": [
+    "location"
   ]
 }
 ```
