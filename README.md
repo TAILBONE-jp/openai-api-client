@@ -43,23 +43,13 @@ const openAI = OpenAIApi({
 })
 ```
 
-## Examples
-### listFiles
+## API Examples
 
-```typescript
-const files = await openAI.listFiles()
+### List Models
+see: https://platform.openai.com/docs/api-reference/models/list
+<details>
+  <summary>Code</summary>
 
-files.data.forEach(({filename, purpose, created_at, status}) => {
-  console.log(`${filename} (${purpose}) Created:${new Date(created_at*1000).toISOString()} status:${status}`)
-})
-```
-#### Result
-```text
-compiled_results.csv (fine-tune-results) Created:2023-05-19T01:19:55.000Z status:processed
-training-data.jsonl (fine-tune) Created:2023-05-19T01:15:35.000Z status:processed
-```
-
-### listModels
 ```typescript
 const models = await openAI.listModels()
 
@@ -77,8 +67,14 @@ ada-code-search-code (openai-dev) created:2022-04-28T19:01:45.000Z
 ada-code-search-text (openai-dev) created:2022-04-28T19:01:50.000Z
 ...
 ```
+</details>
 
-### createChatCompletion
+### Chat Completion
+see: https://platform.openai.com/docs/api-reference/chat/create
+
+<details>
+  <summary>Code</summary>
+
 ```typescript
 import {Schemas} from "openai-api-client";
 import ChatCompletionRequestMessage = Schemas.ChatCompletionRequestMessage;
@@ -104,8 +100,14 @@ console.log(completion.choices[0].message)
   content: 'The expression (1+1)/0 is undefined. Dividing any number by zero is undefined in mathematics.'
 }
 ```
+</details>
 
-### Streaming chat completion
+### Streaming Chat Completion
+see: https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream
+
+<details>
+  <summary>Code</summary>
+
 ```typescript
 import {
   CreateChatCompletionStreamResponse,
@@ -131,8 +133,34 @@ void openAI.createChatCompletion({
   onClose: () => { ... }
 })
 ```
+</details>
 
-### createFile
+### List Files
+see: https://platform.openai.com/docs/api-reference/files/list
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const files = await openAI.listFiles()
+
+files.data.forEach(({filename, purpose, created_at, status}) => {
+  console.log(`${filename} (${purpose}) Created:${new Date(created_at*1000).toISOString()} status:${status}`)
+})
+```
+#### Result
+```text
+compiled_results.csv (fine-tune-results) Created:2023-05-19T01:19:55.000Z status:processed
+training-data.jsonl (fine-tune) Created:2023-05-19T01:15:35.000Z status:processed
+```
+</details>
+
+### Create File
+see: https://platform.openai.com/docs/api-reference/files/upload
+
+<details>
+  <summary>Code</summary>
+
 ```typescript
 const {filename, purpose, created_at, status} = await openAI.createFile({
   requestBody: {
@@ -164,8 +192,15 @@ const fileToBlobWithFilename = (filePath: string): BlobWithFilename => {
 ```text
 training-dummy-data.jsonl (fine-tune) Created:2023-06-15T12:42:27.000Z status:uploaded
 ```
+</details>
 
-### downloadFile
+
+### Download File
+see: https://platform.openai.com/docs/api-reference/files/retrieve-content
+
+<details>
+  <summary>Code</summary>
+
 ```typescript
 const content: string = await openAI.downloadFile({
   parameter: {
@@ -173,9 +208,15 @@ const content: string = await openAI.downloadFile({
   }
 })
 ```
+</details>
+
 
 ### Function Calling
 see: https://platform.openai.com/docs/guides/gpt/function-calling
+
+<details>
+  <summary>Code</summary>
+
 ```typescript
 import {Schemas} from "openai-api-client";
 import ChatCompletionResponseMessage = Schemas.ChatCompletionResponseMessage;
@@ -307,8 +348,10 @@ export interface GetCurrentWeather {
   content: 'The current weather in Boston, MA is sunny with a temperature of 72°F. It is also windy.'
 }
 ```
+</details>
 
-## Set timeout
+
+### Set timeout
 ```typescript
 const abortController = new AbortController()
 const timeoutId = setTimeout(() => abortController.abort(), 1000 * 1) // too short timeout for testing
@@ -330,7 +373,7 @@ console.log(completion.choices[0].message)
 DOMException [AbortError]: This operation was aborted
 ```
 
-## Implement your own throttle manager
+### Customize Throttle Manager
 
 ```typescript
 import {AbstractThrottleManagerService, ResetParams} from "openai-api-client";
@@ -341,10 +384,12 @@ class MyThrottleManagerServiceImpl extends AbstractThrottleManagerService {
     // write your codes
   }
 
+  // Called before fetching
   async wait(): Promise<void> {
     // write your codes
   }
 
+  // Receive response from fetch and reset internal state
   async reset(params: ResetParams): Promise<void> {
     // write your codes
   }
@@ -353,6 +398,32 @@ class MyThrottleManagerServiceImpl extends AbstractThrottleManagerService {
 const openAI = OpenAIApi({
   ... // write parameters
   throttleManagerService: new MyThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID)
+})
+```
+
+### CommonJS
+
+```javascript
+const {openAI} = require("./openAIClient.js");
+
+const listModels = async () => {
+  const models = await openAI.listModels()
+
+  models.data
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .forEach(({id, owned_by, created}) => {
+      console.log(`${id} (${owned_by}) created:${new Date(created * 1000).toISOString()}`)
+    })
+}
+```
+#### openAIClient.js
+```javascript
+const {OpenAIApi, DefaultThrottleManagerServiceImpl} = require("openai-api-client")
+
+exports.openAI = OpenAIApi({
+  organization: CHATGPT_ORGANIZATION_ID,
+  apiKey: CHATGPT_API_KEY,
+  throttleManagerService: new DefaultThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID),
 })
 ```
 
