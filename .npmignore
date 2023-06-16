@@ -1,9 +1,14 @@
 .env
+.eslintrc.cjs
 .idea
 /build-scripts
 /client
 /examples
 /generated
 /node_modules
+index.ts
 openai-api-client.iml
 pnpm-lock.yaml
+tsconfig.build.cjs.json
+tsconfig.build.esm.json
+tsconfig.json

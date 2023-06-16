@@ -5,7 +5,7 @@ const AbstractThrottleManagerService_js_1 = require("./AbstractThrottleManagerSe
 class VoidThrottleManagerServiceImpl extends AbstractThrottleManagerService_js_1.AbstractThrottleManagerService {
     params = undefined;
     constructor() {
-        super("");
+        super('');
     }
     async wait() {
     }

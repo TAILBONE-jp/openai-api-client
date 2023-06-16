@@ -1,12 +1,12 @@
-import { Schemas } from "../generated/apiClient.js";
+import { type Schemas } from '../generated/apiClient.js';
 export interface CreateChatCompletionStreamResponse {
     id: string;
     object: string;
     created: number;
     model: string;
-    choices: {
+    choices: Array<{
         index?: number;
         delta?: Schemas.ChatCompletionResponseMessage;
         finish_reason?: string;
-    }[];
+    }>;
 }

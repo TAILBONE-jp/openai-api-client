@@ -1,5 +1,5 @@
-import { Client } from "../generated/apiClient.js";
-import { AbstractThrottleManagerService } from "./AbstractThrottleManagerService.js";
+import { Client } from '../generated/apiClient.js';
+import { type AbstractThrottleManagerService } from './AbstractThrottleManagerService.js';
 export interface OpenAIApiParams {
     apiKey?: string;
     organization?: string;
@@ -13,4 +13,4 @@ export interface RequestInitWithCallbacks extends RequestInit {
     onMessage?: (json: any) => void;
     onClose?: () => void;
 }
-export declare const OpenAIApi: ({ apiKey, baseUrl, commonOptions, onResponse, organization, throttleManagerService, }: OpenAIApiParams) => Client<RequestInitWithCallbacks>;
+export declare const OpenAIApi: ({ apiKey, baseUrl, commonOptions, onResponse, organization, throttleManagerService }: OpenAIApiParams) => Client<RequestInitWithCallbacks>;

@@ -12,12 +12,12 @@ class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService_j
     debug;
     constructor(id, debug) {
         super(id);
-        this.debug = debug || false;
+        this.debug = debug ?? false;
     }
-    sleep = (msec) => new Promise(resolve => setTimeout(resolve, msec));
+    sleep = async (msec) => await new Promise(resolve => setTimeout(resolve, msec));
     async wait() {
         const current = timeLimitMap.get(this.id);
-        if (current) {
+        if (current !== undefined) {
             const waitTime = current - Date.now();
             if (waitTime > 0) {
                 if (this.debug) {
@@ -31,12 +31,12 @@ class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService_j
         if (this.debug) {
             console.log(params);
         }
-        if (params.remainingRequests === 0 && params.resetRequests) {
+        if (params.remainingRequests === 0 && params.resetRequests != null) {
             const mSec = params.resetRequests;
             await lock.acquire(this.id, () => {
                 const currentValue = timeLimitMap.get(this.id);
                 const now = Date.now();
-                if (!currentValue || currentValue < now) {
+                if ((currentValue == null) || currentValue < now) {
                     timeLimitMap.set(this.id, mSec + now);
                 }
                 else {

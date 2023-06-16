@@ -1,16 +1,16 @@
-import {ApiClient, BlobWithFilename, Client} from "../generated/apiClient.js";
+import { type ApiClient, type BlobWithFilename, Client } from '../generated/apiClient.js'
 
-import {AbstractThrottleManagerService} from "./AbstractThrottleManagerService.js";
-import * as Formatter from "@himenon/openapi-parameter-formatter";
-import {CreateChatCompletionStreamResponse} from "./CreateChatCompletionStreamResponse.js";
+import { type AbstractThrottleManagerService } from './AbstractThrottleManagerService.js'
+import * as Formatter from '@himenon/openapi-parameter-formatter'
+import { type CreateChatCompletionStreamResponse } from './CreateChatCompletionStreamResponse.js'
 
 export interface OpenAIApiParams {
-  apiKey?: string,
-  organization?: string,
-  baseUrl?: string,
-  commonOptions?: RequestInit,
+  apiKey?: string
+  organization?: string
+  baseUrl?: string
+  commonOptions?: RequestInit
   onResponse?: (response: Response) => void
-  throttleManagerService: AbstractThrottleManagerService,
+  throttleManagerService: AbstractThrottleManagerService
 }
 
 export interface RequestInitWithCallbacks extends RequestInit {
@@ -22,7 +22,7 @@ export interface RequestInitWithCallbacks extends RequestInit {
   onClose?: () => void
 }
 
-const OpenAIAPIEndpoint = "https://api.openai.com/v1"
+const OpenAIAPIEndpoint = 'https://api.openai.com/v1'
 
 export const OpenAIApi = (
   {
@@ -31,7 +31,7 @@ export const OpenAIApi = (
     commonOptions,
     onResponse,
     organization,
-    throttleManagerService,
+    throttleManagerService
   }: OpenAIApiParams
 ) => {
   const commonHeaders = commonOptions?.headers
@@ -48,31 +48,31 @@ export const OpenAIApi = (
       },
       options
     ): Promise<any> => {
-      await throttleManagerService.wait();
+      await throttleManagerService.wait()
 
-      const invokeThrottleManagerService = async (response: Response) => {
+      const invokeThrottleManagerService = async (response: Response): Promise<void> => {
         const limitRequests = ratelimitValueToInteger(response.headers.get(
-          "x-ratelimit-limit-requests"
+          'x-ratelimit-limit-requests'
         )) // 3
 
         const limitTokens = ratelimitValueToInteger(response.headers.get(
-          "x-ratelimit-limit-tokens"
+          'x-ratelimit-limit-tokens'
         )) // 40000
 
         const remainingRequests = ratelimitValueToInteger(response.headers.get(
-          "x-ratelimit-remaining-requests"
+          'x-ratelimit-remaining-requests'
         )) // 2
 
         const remainingTokens = ratelimitValueToInteger(response.headers.get(
-          "x-ratelimit-remaining-tokens"
+          'x-ratelimit-remaining-tokens'
         )) // 39532
 
         const resetRequests = ratelimitResetValueToMilliSeconds(response.headers.get(
-          "x-ratelimit-reset-requests"
+          'x-ratelimit-reset-requests'
         )) // 20s
 
         const resetTokens = ratelimitResetValueToMilliSeconds(response.headers.get(
-          "x-ratelimit-reset-tokens"
+          'x-ratelimit-reset-tokens'
         )) // 702ms
 
         await throttleManagerService.reset({
@@ -87,91 +87,93 @@ export const OpenAIApi = (
         })
       }
 
-      const query = generateQueryString(queryParameters);
-      const requestUrl = query ? url + "?" + encodeURI(query) : url;
+      const query = generateQueryString(queryParameters)
+      const requestUrl = (query != null) ? url + '?' + encodeURI(query) : url
 
-      if (apiKey) {
+      if (apiKey != null) {
         headers = {
           ...headers,
-          "Authorization": `Bearer ${apiKey}`
+          Authorization: `Bearer ${apiKey}`
         }
       }
 
-      if (organization) {
+      if (organization != null) {
         headers = {
           ...headers,
-          "OpenAI-Organization": organization
+          'OpenAI-Organization': organization
         }
       }
 
       let response: Response
-      const contentType = headers["Content-Type"]
-      const headersOverride = {...headers, ...commonHeaders, ...options?.headers}
+      const contentType = headers['Content-Type']
+      const headersOverride = { ...headers, ...commonHeaders, ...options?.headers }
 
       delete options?.headers
 
       switch (contentType) {
-        case "application/json":
+        case 'application/json':
           response = await fetch(requestUrl, {
             body: JSON.stringify(requestBody),
             headers: headersOverride,
             method: httpMethod,
             ...commonOptions,
-            ...options,
-          });
-          break
-        case "multipart/form-data":
-          delete headers["Content-Type"]
-          const formData = new FormData()
-
-          Object.entries(requestBody).forEach(([name, value]) => {
-            if (typeof value === "string") {
-              formData.append(name, value)
-            } else {
-              const blobWithFilename = value as BlobWithFilename
-              formData.append(name, blobWithFilename, blobWithFilename.filename)
-            }
+            ...options
           })
+          break
+        case 'multipart/form-data':
+          {
+            delete headers['Content-Type']
+            const formData = new FormData()
 
-          response = await fetch(requestUrl, {
-            body: formData,
-            headers: headersOverride,
-            method: httpMethod,
-            ...commonOptions,
-            ...options,
-          });
+            Object.entries(requestBody).forEach(([name, value]) => {
+              if (typeof value === 'string') {
+                formData.append(name, value)
+              } else {
+                const blobWithFilename = value as BlobWithFilename
+                formData.append(name, blobWithFilename, blobWithFilename.filename)
+              }
+            })
+
+            response = await fetch(requestUrl, {
+              body: formData,
+              headers: headersOverride,
+              method: httpMethod,
+              ...commonOptions,
+              ...options
+            })
+          }
           break
         default:
           if (/\/files\/.+\/content$/.test(url)) {
-            headersOverride.Accept = "*/*" // Bug of OpenAI's schema
+            headersOverride.Accept = '*/*' // Bug of OpenAI's schema
           }
           response = await fetch(requestUrl, {
             headers: headersOverride,
             method: httpMethod,
             ...commonOptions,
-            ...options,
-          });
+            ...options
+          })
           break
       }
 
-      if (onResponse) {
+      if (onResponse != null) {
         onResponse(response.clone())
       }
 
       if (response.ok) {
         await invokeThrottleManagerService(response)
 
-        const responseContentType = response.headers.get("content-type")
+        const responseContentType = response.headers.get('content-type')
         switch (responseContentType) {
-          case "application/json":
+          case 'application/json':
             if (/\/files\/.+\/content$/.test(url)) {
               // Should return text data despite it's content type is application/json (bug of OpenAI's schema)
-              return await response.text();
+              return await response.text()
             } else {
-              return await response.json();
+              return await response.json()
             }
-          case "text/event-stream":
-            if (response.body) {
+          case 'text/event-stream':
+            if (response.body != null) {
               const reader = response.body.getReader()
 
               const textDecoder = new TextDecoder()
@@ -179,22 +181,22 @@ export const OpenAIApi = (
               let sentOnOpen = false
               let shouldContinue = true
               while (shouldContinue) {
-                const {done, value} = await reader.read();
-                const decodedArray = textDecoder.decode(value).split("\n")
+                const { done, value } = await reader.read()
+                const decodedArray = textDecoder.decode(value).split('\n')
 
                 decodedArray.forEach(decoded => {
-                  if (decoded.startsWith("data: ")) {
-                    const stripped = decoded.replace("data: ", "")
-                    if (stripped === "[DONE]") {
-                      if (options?.onClose) {
+                  if (decoded.startsWith('data: ')) {
+                    const stripped = decoded.replace('data: ', '')
+                    if (stripped === '[DONE]') {
+                      if ((options?.onClose) != null) {
                         options.onClose()
                       }
                     } else {
-                      if (!sentOnOpen && options?.onOpen) {
+                      if (!sentOnOpen && ((options?.onOpen) != null)) {
                         sentOnOpen = true
                         options.onOpen()
                       }
-                      if (options?.onMessage) {
+                      if ((options?.onMessage) != null) {
                         options.onMessage(JSON.parse(stripped) as CreateChatCompletionStreamResponse)
                       }
                     }
@@ -202,67 +204,67 @@ export const OpenAIApi = (
                 })
 
                 if (done) {
-                  shouldContinue = false;
+                  shouldContinue = false
                 }
               }
             }
             break
-          case "application/octet-stream":
-            return await response.text();
+          case 'application/octet-stream':
+            return await response.text()
           default:
-            throw new Error(`Unknown content type: ${responseContentType}`)
+            throw new Error(`Unknown content type: ${responseContentType ?? 'null'}`)
         }
       } else {
         throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url}`)
       }
     }
-  };
+  }
 
-  return new Client(openAiApiFetch, baseUrl || OpenAIAPIEndpoint);
-};
+  return new Client(openAiApiFetch, baseUrl ?? OpenAIAPIEndpoint)
+}
 
 const ratelimitResetValueToMilliSeconds = (value: string | null): number | null => {
-  if (value?.endsWith("ms")) {
-    return Number(value?.replaceAll(/[^0-9.]/g, ""))
-  } else if (value?.endsWith("s")) {
-    return Number(value?.replaceAll(/[^0-9.]/g, "")) * 1000
+  if ((value?.endsWith('ms')) === true) {
+    return Number(value?.replaceAll(/[^0-9.]/g, ''))
+  } else if ((value?.endsWith('s')) === true) {
+    return Number(value?.replaceAll(/[^0-9.]/g, '')) * 1000
   } else {
     return null
   }
 }
 
 const ratelimitValueToInteger = (value: string | null): number | null => {
-  return Number(value?.replace(/[^0-9.]/, ""))
+  return Number(value?.replace(/[^0-9.]/, ''))
 }
 
 const generateQueryString = (
   queryParameters: any | undefined
 ): string | undefined => {
-  if (!queryParameters) {
-    return undefined;
+  if (queryParameters === undefined) {
+    return undefined
   }
   const queries = Object.entries(queryParameters).reduce<string[]>(
     (queryStringList, [key, item]) => {
-      // @ts-ignore
-      if (!item.value) {
-        return queryStringList;
+      // @ts-expect-error
+      if (item.value === null) {
+        return queryStringList
       }
-      // @ts-ignore
-      if (!item.style) {
-        // @ts-ignore
-        return queryStringList.concat(`${key}=${item.value}`);
+      // @ts-expect-error
+      if (item.style === null) {
+        // @ts-expect-error
+        return queryStringList.concat(`${key}=${item.value}`)
       }
       const result = Formatter.QueryParameter.generate(
         key,
         item as any
-      );
-      if (result) {
-        return queryStringList.concat(result);
+      )
+      if (result != null) {
+        return queryStringList.concat(result)
       }
-      return queryStringList;
+      return queryStringList
     },
     []
-  );
+  )
 
-  return queries.join("&");
-};
+  return queries.join('&')
+}
