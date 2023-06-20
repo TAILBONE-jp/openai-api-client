@@ -1,4 +1,8 @@
-import { type ApiClient, type BlobWithFilename, Client } from '../generated/apiClient.js'
+import {
+  type ApiClient,
+  type BlobWithFilename,
+  Client,
+} from '../generated/apiClient.js'
 
 import { type AbstractThrottleManagerService } from './AbstractThrottleManagerService.js'
 import * as Formatter from '@himenon/openapi-parameter-formatter'
@@ -24,56 +28,50 @@ export interface RequestInitWithCallbacks extends RequestInit {
 
 const OpenAIAPIEndpoint = 'https://api.openai.com/v1'
 
-export const OpenAIApi = (
-  {
-    apiKey,
-    baseUrl,
-    commonOptions,
-    onResponse,
-    organization,
-    throttleManagerService
-  }: OpenAIApiParams
-) => {
+export const OpenAIApi = ({
+  apiKey,
+  baseUrl,
+  commonOptions,
+  onResponse,
+  organization,
+  throttleManagerService,
+}: OpenAIApiParams) => {
   const commonHeaders = commonOptions?.headers
   delete commonOptions?.headers
 
   const openAiApiFetch: ApiClient<RequestInitWithCallbacks> = {
     request: async (
-      {
-        url,
-        headers,
-        queryParameters,
-        requestBody,
-        httpMethod
-      },
+      { url, headers, queryParameters, requestBody, httpMethod },
       options
     ): Promise<any> => {
       await throttleManagerService.wait()
 
-      const invokeThrottleManagerService = async (response: Response): Promise<void> => {
-        const limitRequests = ratelimitValueToInteger(response.headers.get(
-          'x-ratelimit-limit-requests'
-        )) // 3
+      const invokeThrottleManagerService = async (
+        response: Response
+      ): Promise<void> => {
+        const limitRequests = ratelimitValueToInteger(
+          response.headers.get('x-ratelimit-limit-requests')
+        ) // 3
 
-        const limitTokens = ratelimitValueToInteger(response.headers.get(
-          'x-ratelimit-limit-tokens'
-        )) // 40000
+        const limitTokens = ratelimitValueToInteger(
+          response.headers.get('x-ratelimit-limit-tokens')
+        ) // 40000
 
-        const remainingRequests = ratelimitValueToInteger(response.headers.get(
-          'x-ratelimit-remaining-requests'
-        )) // 2
+        const remainingRequests = ratelimitValueToInteger(
+          response.headers.get('x-ratelimit-remaining-requests')
+        ) // 2
 
-        const remainingTokens = ratelimitValueToInteger(response.headers.get(
-          'x-ratelimit-remaining-tokens'
-        )) // 39532
+        const remainingTokens = ratelimitValueToInteger(
+          response.headers.get('x-ratelimit-remaining-tokens')
+        ) // 39532
 
-        const resetRequests = ratelimitResetValueToMilliSeconds(response.headers.get(
-          'x-ratelimit-reset-requests'
-        )) // 20s
+        const resetRequests = ratelimitResetValueToMilliSeconds(
+          response.headers.get('x-ratelimit-reset-requests')
+        ) // 20s
 
-        const resetTokens = ratelimitResetValueToMilliSeconds(response.headers.get(
-          'x-ratelimit-reset-tokens'
-        )) // 702ms
+        const resetTokens = ratelimitResetValueToMilliSeconds(
+          response.headers.get('x-ratelimit-reset-tokens')
+        ) // 702ms
 
         await throttleManagerService.reset({
           limitRequests,
@@ -83,30 +81,34 @@ export const OpenAIApi = (
           resetRequests,
           resetTokens,
           url,
-          method: httpMethod
+          method: httpMethod,
         })
       }
 
       const query = generateQueryString(queryParameters)
-      const requestUrl = (query != null) ? url + '?' + encodeURI(query) : url
+      const requestUrl = query != null ? url + '?' + encodeURI(query) : url
 
       if (apiKey != null) {
         headers = {
           ...headers,
-          Authorization: `Bearer ${apiKey}`
+          Authorization: `Bearer ${apiKey}`,
         }
       }
 
       if (organization != null) {
         headers = {
           ...headers,
-          'OpenAI-Organization': organization
+          'OpenAI-Organization': organization,
         }
       }
 
       let response: Response
       const contentType = headers['Content-Type']
-      const headersOverride = { ...headers, ...commonHeaders, ...options?.headers }
+      const headersOverride = {
+        ...headers,
+        ...commonHeaders,
+        ...options?.headers,
+      }
 
       delete options?.headers
 
@@ -117,7 +119,7 @@ export const OpenAIApi = (
             headers: headersOverride,
             method: httpMethod,
             ...commonOptions,
-            ...options
+            ...options,
           })
           break
         case 'multipart/form-data':
@@ -130,7 +132,11 @@ export const OpenAIApi = (
                 formData.append(name, value)
               } else {
                 const blobWithFilename = value as BlobWithFilename
-                formData.append(name, blobWithFilename, blobWithFilename.filename)
+                formData.append(
+                  name,
+                  blobWithFilename,
+                  blobWithFilename.filename
+                )
               }
             })
 
@@ -139,7 +145,7 @@ export const OpenAIApi = (
               headers: headersOverride,
               method: httpMethod,
               ...commonOptions,
-              ...options
+              ...options,
             })
           }
           break
@@ -151,7 +157,7 @@ export const OpenAIApi = (
             headers: headersOverride,
             method: httpMethod,
             ...commonOptions,
-            ...options
+            ...options,
           })
           break
       }
@@ -181,24 +187,32 @@ export const OpenAIApi = (
               let sentOnOpen = false
               let shouldContinue = true
 
-              while (shouldContinue && ((options?.signal?.aborted) === undefined || (options?.signal?.aborted) === false)) {
+              while (shouldContinue) {
+                if (options?.signal?.aborted === true) {
+                  throw new Error(options.signal.reason)
+                }
+
                 const { done, value } = await reader.read()
                 const decodedArray = textDecoder.decode(value).split('\n')
 
-                decodedArray.forEach(decoded => {
+                decodedArray.forEach((decoded) => {
                   if (decoded.startsWith('data: ')) {
                     const stripped = decoded.replace('data: ', '')
                     if (stripped === '[DONE]') {
-                      if ((options?.onClose) != null) {
+                      if (options?.onClose != null) {
                         options.onClose()
                       }
                     } else {
-                      if (!sentOnOpen && ((options?.onOpen) != null)) {
+                      if (!sentOnOpen && options?.onOpen != null) {
                         sentOnOpen = true
                         options.onOpen()
                       }
-                      if ((options?.onMessage) != null) {
-                        options.onMessage(JSON.parse(stripped) as CreateChatCompletionStreamResponse)
+                      if (options?.onMessage != null) {
+                        options.onMessage(
+                          JSON.parse(
+                            stripped
+                          ) as CreateChatCompletionStreamResponse
+                        )
                       }
                     }
                   }
@@ -213,21 +227,27 @@ export const OpenAIApi = (
           case 'application/octet-stream':
             return await response.text()
           default:
-            throw new Error(`Unknown content type: ${responseContentType ?? 'null'}`)
+            throw new Error(
+              `Unknown content type: ${responseContentType ?? 'null'}`
+            )
         }
       } else {
-        throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url}`)
+        throw new Error(
+          `[${response.status}] ${response.statusText} at ${httpMethod} ${url}`
+        )
       }
-    }
+    },
   }
 
   return new Client(openAiApiFetch, baseUrl ?? OpenAIAPIEndpoint)
 }
 
-const ratelimitResetValueToMilliSeconds = (value: string | null): number | null => {
-  if ((value?.endsWith('ms')) === true) {
+const ratelimitResetValueToMilliSeconds = (
+  value: string | null
+): number | null => {
+  if (value?.endsWith('ms') === true) {
     return Number(value?.replaceAll(/[^0-9.]/g, ''))
-  } else if ((value?.endsWith('s')) === true) {
+  } else if (value?.endsWith('s') === true) {
     return Number(value?.replaceAll(/[^0-9.]/g, '')) * 1000
   } else {
     return null
@@ -255,10 +275,7 @@ const generateQueryString = (
         // @ts-expect-error
         return queryStringList.concat(`${key}=${item.value}`)
       }
-      const result = Formatter.QueryParameter.generate(
-        key,
-        item as any
-      )
+      const result = Formatter.QueryParameter.generate(key, item as any)
       if (result != null) {
         return queryStringList.concat(result)
       }

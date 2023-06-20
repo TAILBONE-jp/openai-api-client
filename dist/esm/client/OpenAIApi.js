@@ -1,7 +1,7 @@
-import { Client } from '../generated/apiClient.js';
+import { Client, } from '../generated/apiClient.js';
 import * as Formatter from '@himenon/openapi-parameter-formatter';
 const OpenAIAPIEndpoint = 'https://api.openai.com/v1';
-export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, throttleManagerService }) => {
+export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, throttleManagerService, }) => {
     const commonHeaders = commonOptions?.headers;
     delete commonOptions?.headers;
     const openAiApiFetch = {
@@ -22,26 +22,30 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
                     resetRequests,
                     resetTokens,
                     url,
-                    method: httpMethod
+                    method: httpMethod,
                 });
             };
             const query = generateQueryString(queryParameters);
-            const requestUrl = (query != null) ? url + '?' + encodeURI(query) : url;
+            const requestUrl = query != null ? url + '?' + encodeURI(query) : url;
             if (apiKey != null) {
                 headers = {
                     ...headers,
-                    Authorization: `Bearer ${apiKey}`
+                    Authorization: `Bearer ${apiKey}`,
                 };
             }
             if (organization != null) {
                 headers = {
                     ...headers,
-                    'OpenAI-Organization': organization
+                    'OpenAI-Organization': organization,
                 };
             }
             let response;
             const contentType = headers['Content-Type'];
-            const headersOverride = { ...headers, ...commonHeaders, ...options?.headers };
+            const headersOverride = {
+                ...headers,
+                ...commonHeaders,
+                ...options?.headers,
+            };
             delete options?.headers;
             switch (contentType) {
                 case 'application/json':
@@ -50,7 +54,7 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
                         headers: headersOverride,
                         method: httpMethod,
                         ...commonOptions,
-                        ...options
+                        ...options,
                     });
                     break;
                 case 'multipart/form-data':
@@ -71,7 +75,7 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
                             headers: headersOverride,
                             method: httpMethod,
                             ...commonOptions,
-                            ...options
+                            ...options,
                         });
                     }
                     break;
@@ -83,7 +87,7 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
                         headers: headersOverride,
                         method: httpMethod,
                         ...commonOptions,
-                        ...options
+                        ...options,
                     });
                     break;
             }
@@ -108,23 +112,26 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
                             const textDecoder = new TextDecoder();
                             let sentOnOpen = false;
                             let shouldContinue = true;
-                            while (shouldContinue && ((options?.signal?.aborted) === undefined || (options?.signal?.aborted) === false)) {
+                            while (shouldContinue) {
+                                if (options?.signal?.aborted === true) {
+                                    throw new Error(options.signal.reason);
+                                }
                                 const { done, value } = await reader.read();
                                 const decodedArray = textDecoder.decode(value).split('\n');
-                                decodedArray.forEach(decoded => {
+                                decodedArray.forEach((decoded) => {
                                     if (decoded.startsWith('data: ')) {
                                         const stripped = decoded.replace('data: ', '');
                                         if (stripped === '[DONE]') {
-                                            if ((options?.onClose) != null) {
+                                            if (options?.onClose != null) {
                                                 options.onClose();
                                             }
                                         }
                                         else {
-                                            if (!sentOnOpen && ((options?.onOpen) != null)) {
+                                            if (!sentOnOpen && options?.onOpen != null) {
                                                 sentOnOpen = true;
                                                 options.onOpen();
                                             }
-                                            if ((options?.onMessage) != null) {
+                                            if (options?.onMessage != null) {
                                                 options.onMessage(JSON.parse(stripped));
                                             }
                                         }
@@ -145,15 +152,15 @@ export const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organiza
             else {
                 throw new Error(`[${response.status}] ${response.statusText} at ${httpMethod} ${url}`);
             }
-        }
+        },
     };
     return new Client(openAiApiFetch, baseUrl ?? OpenAIAPIEndpoint);
 };
 const ratelimitResetValueToMilliSeconds = (value) => {
-    if ((value?.endsWith('ms')) === true) {
+    if (value?.endsWith('ms') === true) {
         return Number(value?.replaceAll(/[^0-9.]/g, ''));
     }
-    else if ((value?.endsWith('s')) === true) {
+    else if (value?.endsWith('s') === true) {
         return Number(value?.replaceAll(/[^0-9.]/g, '')) * 1000;
     }
     else {

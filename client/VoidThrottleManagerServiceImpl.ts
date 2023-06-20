@@ -1,15 +1,18 @@
-import { AbstractThrottleManagerService, type ResetParams } from './AbstractThrottleManagerService.js'
+import {
+  AbstractThrottleManagerService,
+  type ResetParams,
+} from './AbstractThrottleManagerService.js'
 
 export class VoidThrottleManagerServiceImpl extends AbstractThrottleManagerService {
   params: ResetParams | undefined = undefined
-  constructor () {
+
+  constructor() {
     super('')
   }
 
-  async wait (): Promise<void> {
-  }
+  async wait(): Promise<void> {}
 
-  async reset (params: ResetParams): Promise<void> {
+  async reset(params: ResetParams): Promise<void> {
     this.params = params // Do nothing
   }
 }

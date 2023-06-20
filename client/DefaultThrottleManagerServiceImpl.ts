@@ -1,5 +1,8 @@
 import AsyncLock from 'async-lock'
-import { AbstractThrottleManagerService, type ResetParams } from './AbstractThrottleManagerService.js'
+import {
+  AbstractThrottleManagerService,
+  type ResetParams,
+} from './AbstractThrottleManagerService.js'
 
 const timeLimitMap = new Map<string, number>()
 const lock = new AsyncLock()
@@ -7,15 +10,15 @@ const lock = new AsyncLock()
 export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService {
   debug: boolean
 
-  constructor (id: string, debug?: boolean) {
+  constructor(id: string, debug?: boolean) {
     super(id)
     this.debug = debug ?? false
   }
 
   private readonly sleep = async (msec: number): Promise<unknown> =>
-    await new Promise(resolve => setTimeout(resolve, msec))
+    await new Promise((resolve) => setTimeout(resolve, msec))
 
-  async wait (): Promise<void> {
+  async wait(): Promise<void> {
     const current = timeLimitMap.get(this.id)
     if (current !== undefined) {
       const waitTime = current - Date.now()
@@ -28,7 +31,7 @@ export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerSe
     }
   }
 
-  async reset (params: ResetParams): Promise<void> {
+  async reset(params: ResetParams): Promise<void> {
     if (this.debug) {
       console.log(params)
     }
@@ -40,7 +43,7 @@ export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerSe
         const currentValue = timeLimitMap.get(this.id)
         const now = Date.now()
 
-        if ((currentValue == null) || currentValue < now) {
+        if (currentValue == null || currentValue < now) {
           timeLimitMap.set(this.id, mSec + now)
         } else {
           timeLimitMap.set(this.id, mSec + currentValue)

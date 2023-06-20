@@ -12,11 +12,15 @@ const createFile = async (): Promise<void> => {
   const { filename, purpose, created_at, status } = await openAI.createFile({
     requestBody: {
       file: fileToBlobWithFilename(filePath),
-      purpose: 'fine-tune'
-    }
+      purpose: 'fine-tune',
+    },
   })
 
-  console.log(`${filename} (${purpose}) Created:${new Date(created_at * 1000).toISOString()} status:${status}`)
+  console.log(
+    `${filename} (${purpose}) Created:${new Date(
+      created_at * 1000
+    ).toISOString()} status:${status}`
+  )
 }
 
 void createFile()

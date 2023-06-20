@@ -4,7 +4,7 @@ Yet another OpenAI client for both frontend (ex. React) and backend (Node.js) wi
 ### Features
 * Can use with both frontend and backend codes.
 * Dual package (CommonJS & ESModules)
-* Sync with the official [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI. Current schema version is: 1.3.0
+* Sync with the official [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI. Current schema version is: 2.0.0
 * Streaming completions (`stream=true`) are supported.
 * Basic implementation for throttle management. You can implement your own logic if needed.
 
@@ -265,7 +265,7 @@ const getCurrentWeather = ({location, unit}: { location: string, unit?: string }
   const weather_info = {
     'location': location,
     'temperature': '72',
-    'unit': unit || 'fahrenheit',
+    'unit': unit ?? 'fahrenheit',
     'forecast': ['sunny', 'windy'],
   }
 

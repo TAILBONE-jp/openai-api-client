@@ -7,8 +7,7 @@ class VoidThrottleManagerServiceImpl extends AbstractThrottleManagerService_js_1
     constructor() {
         super('');
     }
-    async wait() {
-    }
+    async wait() { }
     async reset(params) {
         this.params = params; // Do nothing
     }

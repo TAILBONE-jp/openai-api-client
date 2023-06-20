@@ -14,18 +14,20 @@ const main = async (): Promise<void> => {
   ensureDirSync(generatedPath)
 
   await Promise.all(
-    readdirSync(jsonSchemaPath, { withFileTypes: true })
-      .map(async (dirent) => {
-        if (!dirent.isFile()) {
-          return
-        }
+    readdirSync(jsonSchemaPath, { withFileTypes: true }).map(async (dirent) => {
+      if (!dirent.isFile()) {
+        return
+      }
 
-        const type = await compileFromFile(path.join(jsonSchemaPath, dirent.name))
-        const splitted = dirent.name.split('.')
-        splitted.pop()
+      const type = await compileFromFile(path.join(jsonSchemaPath, dirent.name))
+      const splitted = dirent.name.split('.')
+      splitted.pop()
 
-        writeFileSync(path.join(generatedPath, splitted.join('.') + '.d.ts'), type)
-      })
+      writeFileSync(
+        path.join(generatedPath, splitted.join('.') + '.d.ts'),
+        type
+      )
+    })
   )
 }
 

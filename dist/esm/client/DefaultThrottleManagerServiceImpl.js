@@ -1,5 +1,5 @@
 import AsyncLock from 'async-lock';
-import { AbstractThrottleManagerService } from './AbstractThrottleManagerService.js';
+import { AbstractThrottleManagerService, } from './AbstractThrottleManagerService.js';
 const timeLimitMap = new Map();
 const lock = new AsyncLock();
 export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerService {
@@ -8,7 +8,7 @@ export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerSe
         super(id);
         this.debug = debug ?? false;
     }
-    sleep = async (msec) => await new Promise(resolve => setTimeout(resolve, msec));
+    sleep = async (msec) => await new Promise((resolve) => setTimeout(resolve, msec));
     async wait() {
         const current = timeLimitMap.get(this.id);
         if (current !== undefined) {
@@ -30,7 +30,7 @@ export class DefaultThrottleManagerServiceImpl extends AbstractThrottleManagerSe
             await lock.acquire(this.id, () => {
                 const currentValue = timeLimitMap.get(this.id);
                 const now = Date.now();
-                if ((currentValue == null) || currentValue < now) {
+                if (currentValue == null || currentValue < now) {
                     timeLimitMap.set(this.id, mSec + now);
                 }
                 else {

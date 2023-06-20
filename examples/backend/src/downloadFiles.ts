@@ -14,20 +14,27 @@ const downloadFiles = async (): Promise<void> => {
   ensureDirSync(downloadPath)
   const files = await openAI.listFiles()
 
-  const tasks = files.data.map(({ id, filename, purpose, bytes, created_at }) => async () => {
-    try {
-      console.log(`Downloading: ${filename} (${purpose}) ${bytes}bytes Created at:${new Date(created_at * 1000).toISOString()}`)
-      const content: string = await openAI.downloadFile({
-        parameter: {
-          file_id: id
-        }
-      })
+  const tasks = files.data.map(
+    ({ id, filename, purpose, bytes, created_at }) =>
+      async () => {
+        try {
+          console.log(
+            `Downloading: ${filename} (${purpose}) ${bytes}bytes Created at:${new Date(
+              created_at * 1000
+            ).toISOString()}`
+          )
+          const content: string = await openAI.downloadFile({
+            parameter: {
+              file_id: id,
+            },
+          })
 
-      writeFileSync(path.join(downloadPath, filename), content)
-    } catch (e) {
-      console.error(e)
-    }
-  })
+          writeFileSync(path.join(downloadPath, filename), content)
+        } catch (e) {
+          console.error(e)
+        }
+      }
+  )
 
   const pqueue = new PQueue({ concurrency: 1 })
   await pqueue.addAll(tasks)

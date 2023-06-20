@@ -10,11 +10,11 @@ export interface ResetParams {
 }
 
 export abstract class AbstractThrottleManagerService {
-  protected constructor (protected id: string) {
+  protected constructor(protected id: string) {
     this.id = id
   }
 
-  abstract wait (): Promise<void>
+  abstract wait(): Promise<void>
 
-  abstract reset (params: ResetParams): Promise<void>
+  abstract reset(params: ResetParams): Promise<void>
 }

@@ -1,4 +1,5 @@
 .env
+.npmrc
 /generated
 /node_modules
 pnpm-lock.yaml

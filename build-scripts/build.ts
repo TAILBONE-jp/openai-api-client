@@ -15,7 +15,8 @@ const Templates = require('@himenon/openapi-typescript-code-generator/templates'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const remoteSchemaUrl = 'https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml'
+const remoteSchemaUrl =
+  'https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml'
 const generatedPath = path.join(__dirname, '../generated/')
 
 const openApiSchemaPath = path.join(generatedPath, 'openapi.yml')
@@ -39,7 +40,10 @@ const main = async (): Promise<void> => {
   console.log(`Schema version: ${version}`)
 
   const md = readFileSync(mdPath, { encoding: 'utf-8' })
-  const updatedMd = md.replace(/Current schema version is:.*$/gm, `Current schema version is: ${version}`)
+  const updatedMd = md.replace(
+    /Current schema version is:.*$/gm,
+    `Current schema version is: ${version}`
+  )
   writeFileSync(mdPath, updatedMd)
 
   ensureDirSync(generatedPath)
@@ -50,14 +54,14 @@ const main = async (): Promise<void> => {
       formatConversions: [
         {
           selector: {
-            format: 'binary'
+            format: 'binary',
           },
           output: {
-            type: ['string', 'BlobWithFilename']
-          }
-        }
-      ]
-    }
+            type: ['string', 'BlobWithFilename'],
+          },
+        },
+      ],
+    },
   })
   codeGenerator.validateOpenApiSchema()
 
@@ -65,8 +69,9 @@ const main = async (): Promise<void> => {
     codeGenerator.getAdditionalTypeDefinitionCustomCodeGenerator(),
     {
       generator: Templates.ClassApiClient.generator,
-      option: {}
-    }])
+      option: {},
+    },
+  ])
 
   code += [
     '',
@@ -76,15 +81,20 @@ const main = async (): Promise<void> => {
     '    super(blobPart)',
     '    this.filename = filename',
     '  }',
-    '}'].join('\n')
+    '}',
+  ].join('\n')
 
   writeFileSync(`${generatedPath}/apiClient.ts`, code, {
-    encoding: 'utf-8'
+    encoding: 'utf-8',
   })
 
   emptyDirSync(distPath)
-  execSync('pnpm exec tsc --project tsconfig.build.esm.json', { encoding: 'utf-8' })
-  execSync('pnpm exec tsc --project tsconfig.build.cjs.json', { encoding: 'utf-8' })
+  execSync('pnpm exec tsc --project tsconfig.build.esm.json', {
+    encoding: 'utf-8',
+  })
+  execSync('pnpm exec tsc --project tsconfig.build.cjs.json', {
+    encoding: 'utf-8',
+  })
   execSync('pnpm exec tsconfig-to-dual-package', { encoding: 'utf-8' })
 }
 

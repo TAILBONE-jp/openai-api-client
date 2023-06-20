@@ -14,36 +14,6 @@ class Client {
         this.apiClient = apiClient;
         this.baseUrl = baseUrl.replace(/\/$/, "");
     }
-    /**
-     * @deprecated
-     * Lists the currently available (non-finetuned) models, and provides basic information about each one such as the owner and availability.
-     */
-    async listEngines(option) {
-        const url = this.baseUrl + `/engines`;
-        const headers = {
-            Accept: "application/json"
-        };
-        return this.apiClient.request({
-            httpMethod: "GET",
-            url,
-            headers
-        }, option);
-    }
-    /**
-     * @deprecated
-     * Retrieves a model instance, providing basic information about it such as the owner and availability.
-     */
-    async retrieveEngine(params, option) {
-        const url = this.baseUrl + `/engines/${params.parameter.engine_id}`;
-        const headers = {
-            Accept: "application/json"
-        };
-        return this.apiClient.request({
-            httpMethod: "GET",
-            url,
-            headers
-        }, option);
-    }
     /** Creates a model response for the given chat conversation. */
     async createChatCompletion(params, option) {
         const url = this.baseUrl + `/chat/completions`;
@@ -156,32 +126,11 @@ class Client {
             requestBody: params.requestBody
         }, option);
     }
-    /** Translates audio into into English. */
+    /** Translates audio into English. */
     async createTranslation(params, option) {
         const url = this.baseUrl + `/audio/translations`;
         const headers = {
             "Content-Type": "multipart/form-data",
-            Accept: "application/json"
-        };
-        return this.apiClient.request({
-            httpMethod: "POST",
-            url,
-            headers,
-            requestBody: params.requestBody
-        }, option);
-    }
-    /**
-     * @deprecated
-     * The search endpoint computes similarity scores between provided query and documents. Documents can be passed directly to the API if there are no more than 200 of them.
-     *
-     * To go beyond the 200 document limit, documents can be processed offline and then used for efficient retrieval at query time. When `file` is set, the search endpoint searches over all the documents in the given file and returns up to the `max_rerank` number of documents. These documents will be returned along with their search scores.
-     *
-     * The similarity score is a positive score that usually ranges from 0 to 300 (but can sometimes go higher), where a score above 200 usually means the document is semantically similar to the query.
-     */
-    async createSearch(params, option) {
-        const url = this.baseUrl + `/engines/${params.parameter.engine_id}/search`;
-        const headers = {
-            "Content-Type": "application/json",
             Accept: "application/json"
         };
         return this.apiClient.request({
@@ -251,50 +200,6 @@ class Client {
             httpMethod: "GET",
             url,
             headers
-        }, option);
-    }
-    /**
-     * @deprecated
-     * Answers the specified question using the provided documents and examples.
-     *
-     * The endpoint first [searches](/docs/api-reference/searches) over provided documents or files to find relevant context. The relevant context is combined with the provided examples and question to create the prompt for [completion](/docs/api-reference/completions).
-     */
-    async createAnswer(params, option) {
-        const url = this.baseUrl + `/answers`;
-        const headers = {
-            "Content-Type": "application/json",
-            Accept: "application/json"
-        };
-        return this.apiClient.request({
-            httpMethod: "POST",
-            url,
-            headers,
-            requestBody: params.requestBody
-        }, option);
-    }
-    /**
-     * @deprecated
-     * Classifies the specified `query` using provided examples.
-     *
-     * The endpoint first [searches](/docs/api-reference/searches) over the labeled examples
-     * to select the ones most relevant for the particular query. Then, the relevant examples
-     * are combined with the query to construct a prompt to produce the final label via the
-     * [completions](/docs/api-reference/completions) endpoint.
-     *
-     * Labeled examples can be provided via an uploaded `file`, or explicitly listed in the
-     * request using the `examples` parameter for quick tests and small scale use cases.
-     */
-    async createClassification(params, option) {
-        const url = this.baseUrl + `/classifications`;
-        const headers = {
-            "Content-Type": "application/json",
-            Accept: "application/json"
-        };
-        return this.apiClient.request({
-            httpMethod: "POST",
-            url,
-            headers,
-            requestBody: params.requestBody
         }, option);
     }
     /** List your organization's fine-tuning jobs */
