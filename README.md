@@ -1,10 +1,10 @@
 # OpenAI API Client Library
-Yet another OpenAI client for both frontend (ex. React) and backend (Node.js) with TypeScript.
+OpenAI API client synced with the latest schema. For frontend (ex. React) and backend (Node.js). Compatible with CommonJS & ESModules. Written in TypeScript.
 
 ### Features
 * Can use with both frontend and backend codes.
 * Dual package (CommonJS & ESModules)
-* Sync with the official [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI. Current schema version is: 2.0.0
+* Synced with the official [OpenAPI schema](https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml) provided by OpenAI. Current schema version is: 2.0.0
 * Streaming completions (`stream=true`) are supported.
 * Basic implementation for throttle management. You can implement your own logic if needed.
 
@@ -30,7 +30,7 @@ import {OpenAIApi, VoidThrottleManagerServiceImpl} from 'openai-api-client'
 // Accessing to the OpenAI API server via proxy
 const openAI = OpenAIApi({
   baseUrl: '/api/openai', // URL of a proxy implemented at backend
-  throttleManagerService: new VoidThrottleManagerServiceImpl(), // Do not care about rate limit as the proxy handles.
+  throttleManagerService: undefined, // You can omit throttleManagerService if the proxy handles rate limit.
   commonOptions:{ // RequestInit object passed to fetch
     headers:{
       'Authentication': SOME_TOKEN, // To protect the proxy endpoint
@@ -241,6 +241,55 @@ const content: string = await openAI.downloadFile({
 ```
 </details>
 
+### Create Image
+see: https://platform.openai.com/docs/api-reference/images/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const response = await openAI.createImage({
+  requestBody: {
+    prompt: 'a white siamese cat',
+    n: 1,
+    size: '1024x1024',
+    response_format: 'b64_json',
+  },
+})
+
+const b64_json = response.data[0].b64_json
+
+if (b64_json) {
+  const buffer = Buffer.from(b64_json, 'base64')
+  writeFileSync(path.join(__dirname, '../generated/out.png'), buffer)
+}
+```
+</details>
+
+### Create Transcription
+see: https://platform.openai.com/docs/api-reference/audio/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const transcription = await openAI.createTranscription({
+  requestBody:{
+    model: 'whisper-1',
+    file: fileToBlobWithFilename(audioPath),  // See the 'Create File' section for coding fileToBlobWithFilename function
+    language: 'en'
+  }
+})
+
+console.log(transcription.text)
+```
+
+#### Result
+```text
+I met a traveler from an antique land who said, Two vast and trunkless legs of stone Stand in the desert. Near them, on the sand, half sunk, A shattered visage lies, Whose frown and wrinkled lip and sneer Of cold command tell that its sculptor Well those passions read which yet survive, Stamped on these lifeless things, The hand that mocked them and the heart that fed. And on the pedestal these words appear, My name is Ozymandias, King of Kings, Look on my works, ye mighty, and despair. Nothing beside remains. Round the decay of that colossal wreck, Boundless and bare, The lone and level sands stretch far away. End of poem. This recording is in the public domain.
+```
+
+</details>
 
 ### Function Calling
 see: https://platform.openai.com/docs/guides/gpt/function-calling
@@ -465,4 +514,4 @@ exports.openAI = OpenAIApi({
 [MIT License](https://github.com/TAILBONE-jp/openai-api-client/blob/HEAD/LICENSE)
 
 ## Disclaimer
-This is unofficial client library and not endorsed by OpenAI.
+This is an unofficial client library and not endorsed by OpenAI.
