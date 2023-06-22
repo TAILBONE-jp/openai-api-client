@@ -14,7 +14,7 @@ export interface OpenAIApiParams {
   baseUrl?: string
   commonOptions?: RequestInit
   onResponse?: (response: Response) => void
-  throttleManagerService: AbstractThrottleManagerService
+  throttleManagerService?: AbstractThrottleManagerService
 }
 
 export interface RequestInitWithCallbacks extends RequestInit {
@@ -44,7 +44,7 @@ export const OpenAIApi = ({
       { url, headers, queryParameters, requestBody, httpMethod },
       options
     ): Promise<any> => {
-      await throttleManagerService.wait()
+      await throttleManagerService?.wait()
 
       const invokeThrottleManagerService = async (
         response: Response
@@ -73,7 +73,7 @@ export const OpenAIApi = ({
           response.headers.get('x-ratelimit-reset-tokens')
         ) // 702ms
 
-        await throttleManagerService.reset({
+        await throttleManagerService?.reset({
           limitRequests,
           limitTokens,
           remainingRequests,
@@ -124,7 +124,7 @@ export const OpenAIApi = ({
           break
         case 'multipart/form-data':
           {
-            delete headers['Content-Type']
+            delete headersOverride['Content-Type'] // to avoid conflict when passing formData to fetch
             const formData = new FormData()
 
             Object.entries(requestBody).forEach(([name, value]) => {

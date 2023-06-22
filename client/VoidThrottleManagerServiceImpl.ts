@@ -3,6 +3,9 @@ import {
   type ResetParams,
 } from './AbstractThrottleManagerService.js'
 
+/**
+ * @deprecated since version 0.1.3
+ */
 export class VoidThrottleManagerServiceImpl extends AbstractThrottleManagerService {
   params: ResetParams | undefined = undefined
 
