@@ -1,10 +1,10 @@
 export interface ResetParams {
-  limitRequests: number | null
-  limitTokens: number | null
-  remainingRequests: number | null
-  remainingTokens: number | null
-  resetRequests: number | null
-  resetTokens: number | null
+  limitRequests: number | null // x-ratelimit-limit-requests
+  limitTokens: number | null // x-ratelimit-limit-tokens
+  remainingRequests: number | null // x-ratelimit-remaining-requests
+  remainingTokens: number | null // x-ratelimit-remaining-tokens
+  resetRequests: number | null // x-ratelimit-reset-requests
+  resetTokens: number | null // x-ratelimit-reset-tokens
   url: string
   method: string
 }
