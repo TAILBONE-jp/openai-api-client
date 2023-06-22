@@ -6,7 +6,7 @@ export interface OpenAIApiParams {
     baseUrl?: string;
     commonOptions?: RequestInit;
     onResponse?: (response: Response) => void;
-    throttleManagerService: AbstractThrottleManagerService;
+    throttleManagerService?: AbstractThrottleManagerService;
 }
 export interface RequestInitWithCallbacks extends RequestInit {
     onOpen?: () => void;

@@ -32,7 +32,7 @@ const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, t
     delete commonOptions?.headers;
     const openAiApiFetch = {
         request: async ({ url, headers, queryParameters, requestBody, httpMethod }, options) => {
-            await throttleManagerService.wait();
+            await throttleManagerService?.wait();
             const invokeThrottleManagerService = async (response) => {
                 const limitRequests = ratelimitValueToInteger(response.headers.get('x-ratelimit-limit-requests')); // 3
                 const limitTokens = ratelimitValueToInteger(response.headers.get('x-ratelimit-limit-tokens')); // 40000
@@ -40,7 +40,7 @@ const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, t
                 const remainingTokens = ratelimitValueToInteger(response.headers.get('x-ratelimit-remaining-tokens')); // 39532
                 const resetRequests = ratelimitResetValueToMilliSeconds(response.headers.get('x-ratelimit-reset-requests')); // 20s
                 const resetTokens = ratelimitResetValueToMilliSeconds(response.headers.get('x-ratelimit-reset-tokens')); // 702ms
-                await throttleManagerService.reset({
+                await throttleManagerService?.reset({
                     limitRequests,
                     limitTokens,
                     remainingRequests,
@@ -85,7 +85,7 @@ const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, t
                     break;
                 case 'multipart/form-data':
                     {
-                        delete headers['Content-Type'];
+                        delete headersOverride['Content-Type']; // to avoid conflict when passing formData to fetch
                         const formData = new FormData();
                         Object.entries(requestBody).forEach(([name, value]) => {
                             if (typeof value === 'string') {

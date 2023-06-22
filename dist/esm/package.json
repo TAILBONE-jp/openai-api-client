@@ -1,6 +1,6 @@
 {
   "name": "openai-api-client",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Masanori KOMAGAMINE <koma@tailbone.jp>",
   "type": "module",
   "scripts": {
