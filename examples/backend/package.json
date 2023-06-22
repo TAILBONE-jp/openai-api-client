@@ -9,6 +9,8 @@
     "functionCalling": "dotenv -- ts-node src/functionCalling.ts",
     "createFile": "dotenv -- ts-node src/createFile.ts",
     "downloadFiles": "dotenv -- ts-node src/downloadFiles.ts",
+    "createImage": "dotenv -- ts-node src/createImage.ts",
+    "createTranscription": "dotenv -- ts-node src/createTranscription.ts",
     "timeout": "dotenv -- ts-node src/timeout.ts",
     "update": "NODE_OPTIONS='--dns-result-order=ipv4first' pnpm update"
   },
