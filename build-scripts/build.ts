@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { emptyDirSync, ensureDirSync } from 'fs-extra'
 
 import { createRequire } from 'module'
@@ -20,14 +20,41 @@ const remoteSchemaUrl =
 const generatedPath = path.join(__dirname, '../generated/')
 
 const openApiSchemaPath = path.join(generatedPath, 'openapi.yml')
+const etagPath = path.join(generatedPath, 'etag')
+
 const mdPath = path.join(__dirname, '../README.md')
 
 const distPath = path.join(__dirname, '../dist/')
 
-const main = async (): Promise<void> => {
+const shouldDownloadSchema = async () => {
+  let shouldDownload = false
+
+  if (!existsSync(openApiSchemaPath)) {
+    shouldDownload = true
+  }
+
+  if (existsSync(etagPath)) {
+    const response = await fetch(remoteSchemaUrl, { method: 'HEAD' })
+    const currentEtag = response.headers.get('etag')
+
+    const savedEtag = readFileSync(etagPath, { encoding: 'utf-8' }).trim()
+    shouldDownload = savedEtag != currentEtag
+  } else {
+    shouldDownload = true
+  }
+
+  return shouldDownload
+}
+
+const downloadSchema = async () => {
   const response = await fetch(remoteSchemaUrl)
   if (!response.ok) {
     throw new Error(`Cannot download schema from: ${remoteSchemaUrl}`)
+  }
+
+  const currentEtag = response.headers.get('etag')
+  if (currentEtag) {
+    writeFileSync(etagPath, currentEtag, { encoding: 'utf-8' })
   }
 
   const schemaData = await response.text()
@@ -37,7 +64,7 @@ const main = async (): Promise<void> => {
   if (version === undefined) {
     throw new Error(`Cannot parse schema at: ${remoteSchemaUrl}`)
   }
-  console.log(`Schema version: ${version}`)
+  console.log(`Downloaded schema version: ${version}`)
 
   const md = readFileSync(mdPath, { encoding: 'utf-8' })
   const updatedMd = md.replace(
@@ -46,8 +73,17 @@ const main = async (): Promise<void> => {
   )
   writeFileSync(mdPath, updatedMd)
 
-  ensureDirSync(generatedPath)
   writeFileSync(openApiSchemaPath, schemaData)
+}
+
+const main = async (): Promise<void> => {
+  ensureDirSync(generatedPath)
+
+  if (await shouldDownloadSchema()) {
+    await downloadSchema()
+  } else {
+    console.log('Using current schema.')
+  }
 
   const codeGenerator = new CodeGenerator(openApiSchemaPath, {
     convertOption: {
