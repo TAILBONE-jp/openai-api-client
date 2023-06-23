@@ -328,8 +328,8 @@ export class Client {
 }
 export class BlobWithFilename extends Blob {
     filename;
-    constructor(blobPart, filename) {
-        super(blobPart);
+    constructor(blobPart, type, filename) {
+        super(blobPart, { type });
         this.filename = filename;
     }
 }

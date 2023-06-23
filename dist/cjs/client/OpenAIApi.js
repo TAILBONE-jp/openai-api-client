@@ -88,12 +88,28 @@ const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, t
                         delete headersOverride['Content-Type']; // to avoid conflict when passing formData to fetch
                         const formData = new FormData();
                         Object.entries(requestBody).forEach(([name, value]) => {
-                            if (typeof value === 'string') {
-                                formData.append(name, value);
-                            }
-                            else {
-                                const blobWithFilename = value;
-                                formData.append(name, blobWithFilename, blobWithFilename.filename);
+                            const type = typeof value;
+                            switch (type) {
+                                case 'string':
+                                    formData.append(name, value);
+                                    break;
+                                case 'boolean':
+                                    formData.append(name, value.toString());
+                                    break;
+                                case 'number':
+                                    formData.append(name, value.toString());
+                                    break;
+                                case 'bigint':
+                                    formData.append(name, value.toString());
+                                    break;
+                                case 'object':
+                                    const blobWithFilename = value;
+                                    formData.append(name, blobWithFilename, blobWithFilename.filename);
+                                    break;
+                                case 'undefined':
+                                    break;
+                                default:
+                                    throw new Error(`Unknown variable type name:${name} type:${type} value:${value}`);
                             }
                         });
                         response = await fetch(requestUrl, {
@@ -158,7 +174,12 @@ const OpenAIApi = ({ apiKey, baseUrl, commonOptions, onResponse, organization, t
                                                 options.onOpen();
                                             }
                                             if (options?.onMessage != null) {
-                                                options.onMessage(JSON.parse(stripped));
+                                                try {
+                                                    options.onMessage(JSON.parse(stripped));
+                                                }
+                                                catch (e) {
+                                                    // Do nothing
+                                                }
                                             }
                                         }
                                     }
@@ -202,17 +223,14 @@ const generateQueryString = (queryParameters) => {
         return undefined;
     }
     const queries = Object.entries(queryParameters).reduce((queryStringList, [key, item]) => {
-        // @ts-expect-error
-        if (item.value === null) {
+        if (!item.value) {
             return queryStringList;
         }
-        // @ts-expect-error
-        if (item.style === null) {
-            // @ts-expect-error
+        if (!item.style) {
             return queryStringList.concat(`${key}=${item.value}`);
         }
         const result = Formatter.QueryParameter.generate(key, item);
-        if (result != null) {
+        if (result) {
             return queryStringList.concat(result);
         }
         return queryStringList;

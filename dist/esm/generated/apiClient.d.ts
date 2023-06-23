@@ -976,5 +976,5 @@ export declare class Client<RequestOption> {
 }
 export declare class BlobWithFilename extends Blob {
     filename: string;
-    constructor(blobPart: BlobPart[], filename: string);
+    constructor(blobPart: BlobPart[], type: string, filename: string);
 }
