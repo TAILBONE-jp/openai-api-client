@@ -50,8 +50,8 @@ const openAI = OpenAIApi({
 })
 ```
 
-## API Examples
-
+# API Examples
+## Models
 ### List Models
 see: https://platform.openai.com/docs/api-reference/models/list
 <details>
@@ -76,6 +76,32 @@ ada-code-search-text (openai-dev) created:2022-04-28T19:01:50.000Z
 ```
 </details>
 
+### Retrieve Model
+see: https://platform.openai.com/docs/api-reference/models/retrieve
+<details>
+  <summary>Code</summary>
+
+```typescript
+const model = await openAI.retrieveModel({
+  parameter: {
+    model: 'ada',
+  },
+})
+
+console.log(
+        `id:${model.id} object:${model.object} owned_by:${
+                model.owned_by
+        } created:${new Date(model.created * 1000).toISOString()} `
+)
+```
+
+#### Result
+```text
+id:ada object:model owned_by:openai created:2022-04-07T18:51:31.000Z 
+```
+</details>
+
+## Chat
 ### Chat Completion
 see: https://platform.openai.com/docs/api-reference/chat/create
 
@@ -109,7 +135,7 @@ console.log(completion.choices[0].message)
 ```
 </details>
 
-### Streaming Chat Completion
+### Chat Completion (Streaming)
 see: https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream
 
 <details>
@@ -164,131 +190,6 @@ While AI can enhance efficiency and convenience in our lives, the ethical and so
 Ultimately, the future relationships between AI and humans will depend on how we navigate these issues and strike a balance between the benefits of AI and the human values that should guide its development and deployment.
 [onClose]
 ```
-</details>
-
-### List Files
-see: https://platform.openai.com/docs/api-reference/files/list
-
-<details>
-  <summary>Code</summary>
-
-```typescript
-const files = await openAI.listFiles()
-
-files.data.forEach(({filename, purpose, created_at, status}) => {
-  console.log(`${filename} (${purpose}) Created:${new Date(created_at*1000).toISOString()} status:${status}`)
-})
-```
-#### Result
-```text
-compiled_results.csv (fine-tune-results) Created:2023-05-19T01:19:55.000Z status:processed
-training-data.jsonl (fine-tune) Created:2023-05-19T01:15:35.000Z status:processed
-```
-</details>
-
-### Create File
-see: https://platform.openai.com/docs/api-reference/files/upload
-
-<details>
-  <summary>Code</summary>
-
-```typescript
-const {filename, purpose, created_at, status} = await openAI.createFile({
-  requestBody: {
-    file: fileToBlobWithFilename(filePath),
-    purpose: 'fine-tune'
-  }
-})
-
-console.log(`${filename} (${purpose}) Created:${new Date(created_at * 1000).toISOString()} status:${status}`)
-```
-
-#### fileToBlobWithFilename (for backend)
-This library does not contain code for making BlobWithFilename object
-as it will cause conflicts between frontend and backend environment (fail to load 'path' and 'fs' libraries in frontend).
-```typescript
-import {BlobWithFilename} from 'openai-api-client'
-import path from 'path'
-import {readFileSync} from 'fs'
-
-const fileToBlobWithFilename = (filePath: string): BlobWithFilename => {
-  const filename = path.basename(filePath)
-  const buffer = readFileSync(filePath)
-
-  return new BlobWithFilename([buffer], filename)
-}
-```
-
-#### Result
-```text
-training-dummy-data.jsonl (fine-tune) Created:2023-06-15T12:42:27.000Z status:uploaded
-```
-</details>
-
-
-### Download File
-see: https://platform.openai.com/docs/api-reference/files/retrieve-content
-
-<details>
-  <summary>Code</summary>
-
-```typescript
-const content: string = await openAI.downloadFile({
-  parameter: {
-    file_id: id
-  }
-})
-```
-</details>
-
-### Create Image
-see: https://platform.openai.com/docs/api-reference/images/create
-
-<details>
-  <summary>Code</summary>
-
-```typescript
-const response = await openAI.createImage({
-  requestBody: {
-    prompt: 'a white siamese cat',
-    n: 1,
-    size: '1024x1024',
-    response_format: 'b64_json',
-  },
-})
-
-const b64_json = response.data[0].b64_json
-
-if (b64_json) {
-  const buffer = Buffer.from(b64_json, 'base64')
-  writeFileSync(path.join(__dirname, '../generated/out.png'), buffer)
-}
-```
-</details>
-
-### Create Transcription
-see: https://platform.openai.com/docs/api-reference/audio/create
-
-<details>
-  <summary>Code</summary>
-
-```typescript
-const transcription = await openAI.createTranscription({
-  requestBody:{
-    model: 'whisper-1',
-    file: fileToBlobWithFilename(audioPath),  // See the 'Create File' section for coding fileToBlobWithFilename function
-    language: 'en'
-  }
-})
-
-console.log(transcription.text)
-```
-
-#### Result
-```text
-I met a traveler from an antique land who said, Two vast and trunkless legs of stone Stand in the desert. Near them, on the sand, half sunk, A shattered visage lies, Whose frown and wrinkled lip and sneer Of cold command tell that its sculptor Well those passions read which yet survive, Stamped on these lifeless things, The hand that mocked them and the heart that fed. And on the pedestal these words appear, My name is Ozymandias, King of Kings, Look on my works, ye mighty, and despair. Nothing beside remains. Round the decay of that colossal wreck, Boundless and bare, The lone and level sands stretch far away. End of poem. This recording is in the public domain.
-```
-
 </details>
 
 ### Function Calling
@@ -430,11 +331,571 @@ export interface GetCurrentWeather {
 ```
 </details>
 
+## Completions
+### Create Completion
+see: https://platform.openai.com/docs/api-reference/completions/create
 
-### Set timeout
+<details>
+  <summary>Code</summary>
+
+```typescript
+const completion = await openAI.createCompletion({
+  requestBody: {
+    model: 'text-davinci-003',
+    prompt: 'Say this is a test',
+  },
+})
+
+console.log(completion.choices[0].text)
+```
+
+#### Result
+```text
+This is indeed a test.
+```
+</details>
+
+## Edits
+### Create Edit
+see: https://platform.openai.com/docs/api-reference/edits/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const createEdit = await openAI.createEdit({
+  requestBody: {
+    model: 'text-davinci-edit-001',
+    input: 'What day of the wek is it?',
+    instruction: 'Fix the spelling mistakes',
+  },
+})
+
+console.log(createEdit.choices[0].text)
+```
+
+#### Result
+```text
+What day of the week is it?
+
+And what time of the day is it.
+```
+</details>
+
+## Images
+### Create Image
+see: https://platform.openai.com/docs/api-reference/images/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const response = await openAI.createImage({
+  requestBody: {
+    prompt: 'a white siamese cat',
+    n: 1,
+    size: '1024x1024',
+    response_format: 'b64_json',
+  },
+})
+
+const b64_json = response.data[0].b64_json
+
+if (b64_json) {
+  const buffer = Buffer.from(b64_json, 'base64')
+  writeFileSync(path.join(__dirname, '../generated/out.png'), buffer)
+}
+```
+</details>
+
+### Create Image Edit
+see: https://platform.openai.com/docs/api-reference/images/create-edit
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const createImageEdit = await openAI.createImageEdit({
+  requestBody: {
+    // image & mask must be PNG less than 4MB and format must be in ['RGBA', 'LA', 'L']
+    image: fileToBlobWithFilename(otterImagePath),
+    mask: fileToBlobWithFilename(maskImagePath),
+    prompt: 'A cute baby sea otter wearing a beret',
+    n: 2,
+    size: '1024x1024',
+    response_format: 'b64_json',
+  },
+})
+
+createImageEdit.data.forEach((data, index) => {
+  const b64_json = data.b64_json
+
+  if (b64_json) {
+    const buffer = Buffer.from(b64_json, 'base64')
+    writeFileSync(path.join(generatedPath, `ImageEdit_${index}.png`), buffer)
+  }
+})
+```
+</details>
+
+### Create Image Variation
+see: https://platform.openai.com/docs/api-reference/images/create-variation
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const imageVariation = await openAI.createImageVariation({
+  requestBody: {
+    image: fileToBlobWithFilename(otterImagePath),
+    n: 2,
+    size: '1024x1024',
+    response_format: 'b64_json',
+  },
+})
+
+imageVariation.data.forEach((data, index) => {
+  const b64_json = data.b64_json
+
+  if (b64_json) {
+    const buffer = Buffer.from(b64_json, 'base64')
+    writeFileSync(
+            path.join(generatedPath, `ImageVariation_${index}.png`),
+            buffer
+    )
+  }
+})
+```
+</details>
+
+## Embeddings
+### Create Embeddings
+see: https://platform.openai.com/docs/api-reference/embeddings/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const createEmbedding = await openAI.createEmbedding({
+  requestBody: {
+    input: 'The food was delicious and the waiter...',
+    model: 'text-embedding-ada-002',
+  },
+})
+
+console.log(createEmbedding.data)
+```
+
+#### Result
+```text
+[
+  {
+    object: 'embedding',
+    index: 0,
+    embedding: [
+      0.0023063174,  -0.009358601,    0.01578391,  -0.007752274,  -0.004726919,
+       0.014806145,  -0.009809389,  -0.038221695,  -0.006882445,  -0.028723413,
+       0.025206001,    0.01815848, -0.0035777285,  -0.025548855,  0.0004888821,
+       -0.01627914,   0.028418656,   0.005352307,   0.009618915,  -0.016545804,
+      -0.015352169,  0.0042697825,   0.007072918, -0.0070856167, -0.0039364537,
+       0.018463237,   0.008704642,  -0.022729846,   0.011466509,   0.023859989,
+       0.015580738, -0.0035205863,  -0.034894757,  -0.004158673,  -0.026056783,
+       -0.02153621,  -0.005755476,  0.0117331715,   0.008374488,   0.004079309,
+       0.019187037,  -0.014387103,   0.008926861,  0.0063522933,   -0.04576445,
+        0.01780293, -0.0054856385, -0.0007607038,   -0.02204414, -0.0038126458,
+       0.021015583,  -0.017498171,  -0.011758568,  -0.022526674,   0.016406123,
+        0.01715532,  -0.008514169,   0.001606327,   0.025066322,  -0.025015527,
+      0.0077776704,  0.0058348402,  -0.022158425,   0.003052339,  -0.006155471,
+      -0.025332984,  -0.008126872,  0.0011198259, 0.00002167629,  0.0046221586,
+       0.020647334,   0.013510925,  0.0046729515,  -0.015987081,   0.016583899,
+       -0.00893956,   -0.00756815,   0.013650605,  -0.006958634,   0.005377704,
+       0.009904625,   -0.04589143,  0.0030158313,   0.023961574,   0.022971112,
+        0.00706022,  -0.023656817,    0.00994272, -0.0065903855,  -0.033243988,
+      -0.002547584,   0.019834647,  0.0017777532,  0.0010920485,   -0.02269175,
+       0.004993582,   0.015377565,    0.03164401, -0.0054380205,  -0.016050572,
+      ... 1436 more items
+    ]
+  }
+]
+```
+</details>
+
+## Audio
+### Create Transcription
+see: https://platform.openai.com/docs/api-reference/audio/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const transcription = await openAI.createTranscription({
+  requestBody:{
+    model: 'whisper-1',
+    file: fileToBlobWithFilename(audioPath),
+    language: 'en'
+  }
+})
+
+console.log(transcription.text)
+```
+
+#### Result
+```text
+I met a traveler from an antique land who said, Two vast and trunkless legs of stone Stand in the desert. Near them, on the sand, half sunk, A shattered visage lies, Whose frown and wrinkled lip and sneer Of cold command tell that its sculptor Well those passions read which yet survive, Stamped on these lifeless things, The hand that mocked them and the heart that fed. And on the pedestal these words appear, My name is Ozymandias, King of Kings, Look on my works, ye mighty, and despair. Nothing beside remains. Round the decay of that colossal wreck, Boundless and bare, The lone and level sands stretch far away. End of poem. This recording is in the public domain.
+```
+</details>
+
+### Create Translation
+see: https://platform.openai.com/docs/api-reference/audio/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const createTranslation = await openAI.createTranslation({
+  requestBody: {
+    model: 'whisper-1',
+    file: fileToBlobWithFilename(germanAudioPath),
+  },
+})
+
+console.log(createTranslation.text)
+```
+
+#### Result
+```text
+How are you?
+```
+</details>
+
+## Files
+### List Files
+see: https://platform.openai.com/docs/api-reference/files/list
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const files = await openAI.listFiles()
+
+files.data.forEach(({filename, purpose, created_at, status}) => {
+  console.log(`${filename} (${purpose}) Created:${new Date(created_at*1000).toISOString()} status:${status}`)
+})
+```
+#### Result
+```text
+compiled_results.csv (fine-tune-results) Created:2023-05-19T01:19:55.000Z status:processed
+training-data.jsonl (fine-tune) Created:2023-05-19T01:15:35.000Z status:processed
+```
+</details>
+
+### Upload File
+see: https://platform.openai.com/docs/api-reference/files/upload
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const {filename, purpose, created_at, status} = await openAI.uploadFile({
+  requestBody: {
+    file: fileToBlobWithFilename(filePath),
+    purpose: 'fine-tune'
+  }
+})
+
+console.log(`${filename} (${purpose}) Created:${new Date(created_at * 1000).toISOString()} status:${status}`)
+```
+
+#### Result
+```text
+training-dummy-data.jsonl (fine-tune) Created:2023-06-15T12:42:27.000Z status:uploaded
+```
+</details>
+
+### Delete File
+see: https://platform.openai.com/docs/api-reference/files/delete
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const deleteFile = await openAI.deleteFile({
+  parameter: {
+    file_id: 'file-CcvcjCwApoXzg10PkYXEY0ms',
+  },
+})
+
+console.log(deleteFile)
+```
+
+#### Result
+```text
+{ object: 'file', id: 'file-CcvcjCwApoXzg10PkYXEY0ms', deleted: true }
+```
+</details>
+
+### Retrieve File
+see: https://platform.openai.com/docs/api-reference/files/retrieve
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const { bytes, created_at, purpose, filename } = await openAI.retrieveFile({
+  parameter: {
+    file_id: 'file-CcvcjCwApoXzg10PkYXEY0ms',
+  },
+})
+
+console.log(
+        `${filename} (${purpose}) ${bytes}bytes createdAt:${new Date(
+                created_at * 1000
+        ).toISOString()}`
+)
+```
+
+#### Result
+```text
+training-dummy-data.jsonl (fine-tune) 134bytes createdAt:2023-06-15T12:42:27.000Z
+```
+</details>
+
+### Retrieve File Content
+see: https://platform.openai.com/docs/api-reference/files/retrieve-content
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const content: string = await openAI.downloadFile({
+  parameter: {
+    file_id: id
+  }
+})
+```
+</details>
+
+## Fine-tunes
+### Create Fine-tune
+see: https://platform.openai.com/docs/api-reference/fine-tunes/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+await openAI.createFineTune({
+  requestBody: {
+    training_file: trainingFileId,
+    model: 'davinci',
+  },
+})
+```
+</details>
+
+### List Fine-tunes
+see: https://platform.openai.com/docs/api-reference/fine-tunes/list
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const fineTunes = await openAI.listFineTunes()
+
+fineTunes.data.forEach((fineTune) => {
+  console.log(fineTune)
+})
+```
+
+#### Result
+```text
+{
+  object: 'fine-tune',
+  id: 'ft-3hdwiNtrDdVToqccSZ8XJ26U',
+  hyperparams: {
+    n_epochs: 4,
+    batch_size: 1,
+    prompt_loss_weight: 0.01,
+    learning_rate_multiplier: 0.1
+  },
+  ...
+```
+</details>
+
+### Retrieve Fine-tune
+see: https://platform.openai.com/docs/api-reference/fine-tunes/retrieve
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const fineTune = await openAI.retrieveFineTune({
+  parameter: {
+    fine_tune_id: fineTuneId,
+  },
+})
+
+console.log(fineTune)
+```
+
+#### Result
+```text
+{
+  object: 'fine-tune',
+  id: 'ft-3hdwiNtrDdVToqccSZ8XJ26U',
+  hyperparams: {
+    n_epochs: 4,
+    batch_size: 1,
+    prompt_loss_weight: 0.01,
+    learning_rate_multiplier: 0.1
+  },
+  ...
+```
+</details>
+
+### Cancel Fine-tune
+see: https://platform.openai.com/docs/api-reference/fine-tunes/cancel
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const fineTune = await openAI.cancelFineTune({
+  parameter: {
+    fine_tune_id: fineTuneId,
+  },
+})
+```
+</details>
+
+### List Fine-tune Events (Streaming)
+see: https://platform.openai.com/docs/api-reference/fine-tunes/events
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+await openAI.listFineTuneEvents(
+        {
+          parameter: {
+            fine_tune_id: fineTuneId,
+            stream: true,
+          },
+        },
+        {
+          onMessage: (json: FineTuneEvent) => {
+            console.log(json)
+          },
+        }
+)
+```
+
+#### Result (Streaming)
+```text
+{
+  object: 'fine-tune-event',
+  level: 'info',
+  message: 'Created fine-tune: ft-3hdwiNtrDdVToqccSZ8XJ26U',
+  created_at: 1684230378
+}
+  ...
+```
+</details>
+
+### Delete Fine-tune Model
+see: https://platform.openai.com/docs/api-reference/fine-tunes/delete-model
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+await openAI.deleteModel({
+  parameter: {
+    model: fineTuneModel,
+  },
+})
+```
+</details>
+
+
+## Moderations
+### Create Moderation
+see: https://platform.openai.com/docs/api-reference/moderations/create
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+const createModeration = await openAI.createModeration({
+  requestBody: {
+    input: 'I want to kill them.',
+    model: 'text-moderation-latest',
+  },
+})
+
+console.log(createModeration.results[0])
+```
+#### Result
+```text
+{
+  flagged: true,
+  categories: {
+    sexual: false,
+    hate: false,
+    violence: true,
+    'self-harm': false,
+    'sexual/minors': false,
+    'hate/threatening': false,
+    'violence/graphic': false
+  },
+  category_scores: {
+    sexual: 9.697637e-7,
+    hate: 0.18252534,
+    violence: 0.8871539,
+    'self-harm': 1.9077322e-9,
+    'sexual/minors': 1.3826513e-8,
+    'hate/threatening': 0.003294188,
+    'violence/graphic': 3.1962415e-8
+  }
+}
+```
+</details>
+
+## Tips
+### fileToBlobWithFilename (for backend)
+This library does not contain code for making BlobWithFilename object
+as it will cause conflicts between frontend and backend environment (ex. fail to load 'path' and 'fs' libraries in frontend).
+
+<details>
+  <summary>Code</summary>
+
+```typescript
+import { BlobWithFilename } from 'openai-api-client'
+import path from 'path'
+import { readFileSync } from 'fs'
+import mime from 'mime-types'
+
+export const fileToBlobWithFilename = (filePath: string): BlobWithFilename => {
+  const filename = path.basename(filePath)
+  const buffer = readFileSync(filePath)
+  const type = mime.lookup(filename)
+  if (type === false) {
+    throw new Error(`Cannot lookup mime type: ${filename}`)
+  }
+
+  return new BlobWithFilename([buffer], type, filename)
+}
+```
+</details>
+
+### Set Timeout
+To interrupt API calling when it takes too long.
+
+<details>
+  <summary>Code</summary>
+
 ```typescript
 const abortController = new AbortController()
-const timeoutId = setTimeout(() => abortController.abort(), 1000 * 1) // too short timeout for testing
+const timeoutId = setTimeout(() => abortController.abort(), 1000) // too short timeout for testing
 
 const completion = await openAI.createChatCompletion({
   requestBody: {
@@ -452,8 +913,13 @@ console.log(completion.choices[0].message)
 ```text
 DOMException [AbortError]: This operation was aborted
 ```
+</details>
 
 ### Customize Throttle Manager
+You can write your own logic of handling rate limit.
+
+<details>
+  <summary>Code</summary>
 
 ```typescript
 import {AbstractThrottleManagerService, ResetParams} from 'openai-api-client'
@@ -480,8 +946,13 @@ const openAI = OpenAIApi({
   throttleManagerService: new MyThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID)
 })
 ```
+</details>
 
 ### CommonJS
+Example of using this library in CommonJS environment. 
+
+<details>
+  <summary>Code</summary>
 
 ```javascript
 const {openAI} = require('./openAIClient.js')
@@ -506,6 +977,12 @@ exports.openAI = OpenAIApi({
   throttleManagerService: new DefaultThrottleManagerServiceImpl(CHATGPT_ORGANIZATION_ID),
 })
 ```
+</details>
+
+## Breaking Changes
+### v1.0.0
+* VoidThrottleManagerServiceImpl was deprecated. Just omit the `throttleManagerService` parameter of the `OpenAIApi` function or pass `undefined` to the parameter if you don't need throttle management.
+* The constructor of `BlobWithFilename` was changed to `(blobPart: BlobPart[], type: string, filename: string)` to pass MIME type of uploading file to API server properly.
 
 ## Support
 [Issue tracker](https://github.com/TAILBONE-jp/openai-api-client/issues)

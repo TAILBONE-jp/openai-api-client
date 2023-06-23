@@ -1,6 +1,6 @@
 {
   "name": "openai-api-client",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "author": "Masanori KOMAGAMINE <koma@tailbone.jp>",
   "type": "module",
   "scripts": {
@@ -42,6 +42,7 @@
     "esm",
     "cjs",
     "frontend",
-    "backend"
+    "backend",
+    "streaming"
   ]
 }
