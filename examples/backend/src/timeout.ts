@@ -1,27 +1,23 @@
 import { openAI } from './openAIClient.js'
 import { clearTimeout } from 'timers'
 
-const timeout = async (): Promise<void> => {
-  const abortController = new AbortController()
-  const timeoutId = setTimeout(() => {
-    abortController.abort()
-  }, 1000)
+const abortController = new AbortController()
+const timeoutId = setTimeout(() => {
+  abortController.abort()
+}, 1000)
 
-  const completion = await openAI.createChatCompletion(
-    {
-      requestBody: {
-        model: 'gpt-3.5-turbo-0613',
-        messages: [{ role: 'user', content: 'Please calculate (1+1)/0' }],
-      },
+const completion = await openAI.createChatCompletion(
+  {
+    requestBody: {
+      model: 'gpt-3.5-turbo-0613',
+      messages: [{ role: 'user', content: 'Please calculate (1+1)/0' }],
     },
-    {
-      signal: abortController.signal,
-    }
-  )
+  },
+  {
+    signal: abortController.signal,
+  }
+)
 
-  clearTimeout(timeoutId)
+clearTimeout(timeoutId)
 
-  console.log(completion.choices[0].message)
-}
-
-void timeout()
+console.log(completion.choices[0].message)

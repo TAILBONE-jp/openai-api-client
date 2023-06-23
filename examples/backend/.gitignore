@@ -2,4 +2,5 @@
 /download
 node_modules
 *.png
+*.jpg
 *.mp3
